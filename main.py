@@ -9,8 +9,8 @@
 #  6. Play card's effect if no challenge or challenge fails
 
 class Action:
-    name = "Income"
-    description = "Gain 1 gold"
+    name = ""
+    description = ""
     
     def __init__(self):
         pass
@@ -18,3 +18,18 @@ class Action:
     def play(self, player, target = None):
         # should be overrriden by child classes
         pass
+
+class Income(Action):
+    name = "Income"
+    description = "Gain 1 gold"
+    
+    def play(self, player, target = None):
+        player.coins += 1
+        
+class Player():
+    def __init__(self):
+        self.coins = 2
+
+    def play(self, action):
+        action.play(action, self)
+    

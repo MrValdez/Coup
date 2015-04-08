@@ -1,7 +1,8 @@
 # Actions available:
 #   Income
-#   ForeignAid
-from game import GameState
+#   Foreign Aid
+#   Coup
+#   Duke
 
 class Action:
     name = ""

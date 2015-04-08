@@ -52,7 +52,7 @@ class Player():
         if blockingPlayer != None:
             # Step 1.a
             if self.confirmCall(blockingPlayer, blockingAction):
-                if blockingAction in blockingPlayer:
+                if blockingAction in blockingPlayer.influence:
                     self.loseInfluence()
                     message = "Player %s has %s. Player %s loses influence." % (blockingPlayer.name, blockingAction.name, self.name)
                     blockingPlayer.changeCard(blockingAction)
@@ -93,3 +93,16 @@ class Player():
         """ returns action used by player to blocks action. return None if player allows action. """
         # todo: raise notImplemented. should be overriden
         return None
+        
+    def changeCard(self, card):
+        """
+        change card to a new card from the player deck. This is called when a card is exposed after a call for bluff.
+        """
+        if not card in self.influence:
+            raise "%s is not found in player's influence. Something went wrong" % card
+            
+        self.influence.remove(card)
+        GameState.AddToDeck(card)
+        
+        newCard = GameState.DrawCard()
+        self.influence.append(newCard)

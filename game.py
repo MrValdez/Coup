@@ -1,9 +1,14 @@
+import action
+import random
+
 class GameState:
     def __init__(self):
         self.reset()
         
     def reset(self):
         self.PlayerList = []
+        self.Deck = []
+        self.Deck = [action.Income] * 3    # test code
 
     def requestBlocks(self, activePlayer, action):
         """ 
@@ -29,5 +34,13 @@ class GameState:
             if player == activePlayer: continue
             if player.confirmCall(activePlayer, action): return player
         return None
-        
+
+    def AddToDeck(self, card):
+        self.Deck.append(card)
+    
+    def DrawCard(self):
+        card = random.choice(self.Deck)
+        self.Deck.remove(card)
+        return card
+                
 GameState = GameState()     # global variable

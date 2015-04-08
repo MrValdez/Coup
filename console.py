@@ -114,6 +114,7 @@ def MainLoop():
             CurrentPlayer += 1
             if CurrentPlayer >= len(Players): CurrentPlayer = 0
             PlayersAlive = [player for player in Players if player.alive]
+            print(PlayersAlive)
         
         def ChooseAction():    
             move = input ("Action> ")
@@ -126,9 +127,13 @@ def MainLoop():
                 ChooseAction()
                 return
             
+            status = False
             print("Playing %s" % AvailableActions[move].name)
             try:
                 status, response = player.play(AvailableActions[move])
+            except action.BlockOnly:
+                print("You cannot play %s as an action" % (AvailableActions[move].name))
+                ChooseAction()
             except action.TargetRequired:
                 def ChooseTarget():
                     for i, player in enumerate(Players):
@@ -150,7 +155,6 @@ def MainLoop():
                 print (response)
                 ChooseAction()
             
-        
         PrintInfo()
         PrintActions()
         ChooseAction()

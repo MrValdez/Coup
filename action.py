@@ -1,7 +1,9 @@
 # Coup specific exceptions
 #   TargetRequired
 #   BlockOnly
+#   DeadPlayer
 #   InvalidTarget
+#   ActionNotAllowed
 
 # Actions implemented:
 #   Income
@@ -17,7 +19,13 @@ from game import GameState
 
 class TargetRequired(Exception):   pass
 class BlockOnly(Exception):        pass
+class DeadPlayer(Exception):        pass
 class InvalidTarget(Exception):    
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+class ActionNotAllowed(Exception):
     def __init__(self, message):
         self.message = message
     def __str__(self):

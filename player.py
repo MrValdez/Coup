@@ -1,4 +1,4 @@
-from action import Action
+from action import Action, Coup, DeadPlayer, ActionNotAllowed
 from game import GameState
 import random
 
@@ -55,10 +55,10 @@ class Player():
                    Else, remove influence from calling player        
         """        
         if not self.alive:
-            raise BaseException     # todo: add Coup-specific exception where a dead player is playing an action
+            raise DeadPlayer
         
-        if self.coins >= 12 and action != action.Coup:
-            raise BaseException     # todo: add Coup-specific exception where the player can only play Coup            
+        if self.coins >= 12 and action != Coup:
+            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))
         
         # Step 3
         blockingPlayer, blockingAction = GameState.requestBlocks(self, action)

@@ -3,6 +3,7 @@ from player import Player
 from game   import GameState
 
 import random
+import os
 
 Players = []
 PlayersAlive = []
@@ -41,26 +42,51 @@ def PrintTurnOrder():
 
 def PrintDeckList():
     print ("Cards in Court Deck (%i cards):" % (len(GameState.Deck)))
-    for card in GameState.Deck:
-        print(" ", card.name)
+    deck = [card.name for card in GameState.Deck]
+    deck.sort()
+    for card in deck:
+        print(" ", card)
 
 def MainLoop():
     # Infinite loop until one player remains
     global PlayersAlive, CurrentPlayer
     
     while len(PlayersAlive) > 1:
-        PrintDeckList()
-        player = Players[CurrentPlayer]
-        print("Action for %s: " % (player.name))
-        for card in player.influence:
-            print(" ", card.name, end = "")
-        print("\n")
+        def PrintInfo():
+            os.system("cls")
+            player = Players[CurrentPlayer]
+            print("%s's turn" % player.name)
+            print ("=================\n ")
+            PrintDeckList()
+            print("\nCards in hand of %s: " % (player.name), end = "")
+            print (" and ".join([card.name for card in player.influence]))
+            print()
         
-        CurrentPlayer += 1
-        if CurrentPlayer >= len(Players): CurrentPlayer = 0
-        PlayersAlive = [player for player in Players if player.alive]
-        input()
+        def PrintActions():
+            print("Available actions:")
+            i = 1
+            for action in GameState.CommonActions:
+                print (" %i: %s" % (i, action.name))
+                i += 1
+            for action in GameState.CardsAvailable:
+                print (" %i: %s" % (i, action.name))
+                i += 1
+        
+        def Cleanup():
+            global CurrentPlayer
+            CurrentPlayer += 1
+            if CurrentPlayer >= len(Players): CurrentPlayer = 0
+            PlayersAlive = [player for player in Players if player.alive]
+            
+        PrintInfo()
+        PrintActions()
+        input ("Action > ")
+        Cleanup()
+        
+    print("\nThe winner is %s" % (PlayersAlive[0].name))
 
+os.system("cls")
 Setup()
 PrintTurnOrder()
+input("\nPress enter key to start...")
 MainLoop()

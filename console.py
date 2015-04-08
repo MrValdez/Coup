@@ -63,6 +63,8 @@ def Setup():
         #player.name = input(" What is your name? ")
         player.name = random.choice(["A", "B", "C"]) + str(Number)
         
+        player.loseInfluence()
+        
         return player
 
     for i in range(PlayerCount):
@@ -113,8 +115,9 @@ def MainLoop():
             global CurrentPlayer
             CurrentPlayer += 1
             if CurrentPlayer >= len(Players): CurrentPlayer = 0
+            
+            global PlayersAlive 
             PlayersAlive = [player for player in Players if player.alive]
-            print(PlayersAlive)
         
         def ChooseAction():    
             move = input ("Action> ")
@@ -155,9 +158,10 @@ def MainLoop():
                 print (response)
                 ChooseAction()
             
-        PrintInfo()
-        PrintActions()
-        ChooseAction()
+        if player.alive:
+            PrintInfo()
+            PrintActions()
+            ChooseAction()
         Cleanup()
         input("\nPress enter key to continue...")
         

@@ -47,6 +47,7 @@ class GameState:
     def AddToDeck(self, card):
         # todo: add error handling
         self.Deck.append(card)
+        random.shuffle(self.Deck)
     
     def DrawCard(self):
         if not len(self.Deck): return False

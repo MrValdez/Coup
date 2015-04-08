@@ -94,20 +94,52 @@ class ActionBlocks(unittest.TestCase):
         GameState.reset()
         
     class AlwaysBlockingPlayer(Player):
-        def confirmBlock(self, action):
-            return True
+        def confirmBlock(self, action): return True
+
+    class NeverBlockingPlayer(Player):
+        def confirmBlock(self, action): return False
             
-    def test_ForeignAid(self):
-        """ Test for players blocking foriegn aid """
-        player = self.player
-        player_blocker = ActionBlocks.AlwaysBlockingPlayer()
+    def test_BlockingAction(self):
+        """ Test if players can block """
+        #todo: use a mock object to create a mock action that is blockable
+        
+        player            = self.player
+        player_blocker    = ActionBlocks.AlwaysBlockingPlayer()
+        
         self.assertIn(player_blocker, GameState.PlayerList)
 
+        self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)
-        self.assertFalse(status, response)
+        self.assertEqual(player.coins, 2)
         
+        self.assertFalse(status, response)
         expectedMessage = "Blocked by %s" % player_blocker
         self.assertEqual(response, expectedMessage)
+        
+
+    def test_BlockingAction(self):
+        """ Test if players can block """
+        #todo: use a mock object to create a mock action that is blockable
+        player            = self.player
+        player_nonblocker = ActionBlocks.NeverBlockingPlayer()
+        
+        self.assertIn(player_nonblocker, GameState.PlayerList)
+
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)        
+        self.assertEqual(player.coins, 4)
+        
+        self.assertTrue(status)
+    
+    def test_ForeignAid(self):
+        """ Test for players blocking foriegn aid """
+        player            = self.player
+        player_blocker    = ActionBlocks.AlwaysBlockingPlayer()
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)
+        self.assertFalse(status, response)                
+        self.assertEqual(player.coins, 2)
                 
 if __name__ == "__main__":
     unittest.main()

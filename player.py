@@ -27,7 +27,6 @@ class Player():
         # Step 3
         # Step 4
         status, response = action.play(action, self, target)
-        
         return status, response
     
     def loseInfluence(self):

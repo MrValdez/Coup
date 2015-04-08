@@ -10,6 +10,28 @@ class Player():
         
         GameState.PlayerList.append(self)
         
+    def giveCards(self, card1, card2 = None):
+        """
+        Give the player one or two cards. 
+         If player cannot receive cards, return False.
+         If card2 is supplied but player only has one influence left, card2 will be ignored.
+         Returns True on success, returns False on failure. Todo: raise error (or return message) if card2 is supplied but player
+         only have one influence left.
+        """
+        if not self.alive:
+            return False
+            
+        influencesLeft = len(self.influence)
+        if influencesLeft <= 0 or influencesLeft > 2: 
+            return False
+        
+        self.influence[0] = card1
+        
+        if len(self.influence) == 2:
+            self.influence[1] = card2
+            
+        return True
+        
     def play(self, action, target = None):
         """
         1. Check if a player wants to block

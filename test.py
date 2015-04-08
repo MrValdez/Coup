@@ -85,6 +85,15 @@ class Players(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         self.assertTrue(player.alive)        
     
+    def test_GiveCards(self):
+        """ 
+        Test to check if one card or two cards can be given to someone with:
+         - two influence
+         - one influence
+         - no influence
+        """
+        self.fail("not yet implemented")
+    
 class ActionBlocks(unittest.TestCase):
     def setUp(self):
         GameState.PlayerList = []
@@ -124,7 +133,7 @@ class ActionBlocks(unittest.TestCase):
         expectedMessage = "Blocked by %s" % player_blocker
         self.assertEqual(response, expectedMessage)
 
-    def test_BlockingAction(self):
+    def test_BlockingAction_NoResponse(self):
         """ Test if players can block """
         #todo: use a mock object to create a mock action that is blockable
         player            = self.player
@@ -158,11 +167,41 @@ class CallBluff(unittest.TestCase):
         GameState.reset()
 
     class AlwaysCallingPlayer(Player):
-        pass
+        def confirmCall(self, action): return True
     
-    def test_CallActivePlayerBluff(self):
+    def test_CallActivePlayerBluff_Success(self):
+        """ Test if other players can call active player's bluff """
         player           = self.player
+        player.giveCards(action.Income)      #todo: add mock object for action
+        self.assertEqual(len(player.influence), 2)
+        
         player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        
+        playedAction = action.ForeignAid
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(playedAction)
+        self.assertEqual(player.coins, 2)
+
+        self.assertEqual(len(player.influence), 1)
+        self.assertFalse(status, response)                
+        expectedMessage = "Bluffing %s failed for %s" % (playedAction.name, player)
+        self.assertEqual(response, expectedMessage)
+
+    def test_CallActivePlayerBluff_Failed(self):
+        """ Test if other players can call active player's bluff """
+        player           = self.player
+        player.giveCards(action.ForeignAid)
+        self.assertEqual(len(player.influence), 2)
+        
+        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        
+        playedAction = action.ForeignAid
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(playedAction)
+        self.assertEqual(player.coins, 4)
+
+        self.assertEqual(len(player.influence), 2)
+        self.assertTrue(status)
         
 if __name__ == "__main__":
     unittest.main()

@@ -73,6 +73,7 @@ class Player():
         # Step 4
         callingPlayer = GameState.requestCallForBluffs(self, action)
         if callingPlayer != None:
+            # step 4.a
             if action in self.influence:
                 callingPlayer.loseInfluence()
             else:

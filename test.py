@@ -110,13 +110,25 @@ class Actions(unittest.TestCase):
         player2 = Player()
         
         self.assertEqual(len(player2.influence), 2)
+        self.assertEqual(player.coins, 2)
         
         status, response = player.play(action.Assassin, player2)
+        self.assertEqual(player.coins, 0)
         self.assertEqual(len(player2.influence), 1)
         
+        player.coins = 2
         status, response = player.play(action.Assassin, player2)
+        self.assertEqual(player.coins, 0)
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
+
+        player2 = Player()
+        self.assertEqual(player.coins, 0)
+        self.assertEqual(len(player2.influence), 2)
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Assassin, player2)
+        self.assertEqual(len(player2.influence), 2)
+        self.assertEqual(player.coins, 0)
         
     def test_Ambassador(self):        
         class AmbassadorTester(Player):
@@ -540,7 +552,21 @@ class CallBluff(unittest.TestCase):
         
     def test_Assasinate_FailedContessaBluff(self):
         """ Important rule test: An assasination attempt is done to opponent. Opponent bluff with Contessa. Active player calls bluff. The opposing player should lose. This will test for situations where the opposing player has two or one influence """
-        self.fail("Not yet implemented")
+        class ContessaBluffer(Player):
+            def confirmBlock(self, opponentAction): return action.Contessa
+
+        player  = CallBluff.AlwaysCallingPlayer()
+        player2 = ContessaBluffer()
+        player2.influence = [action.Income, action.Income]
+        
+        self.assertEqual(len(player2.influence), 2)
+        self.assertTrue(player2.alive)
+        
+        status, response = player.play(action.Assassin, player2)
+        self.assertEqual(player.coins, 0)
+
+        self.assertEqual(len(player2.influence), 0)
+
     
 if __name__ == "__main__":
     unittest.main()

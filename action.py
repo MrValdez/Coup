@@ -106,7 +106,10 @@ class Assassin(Action):
     def play(self, player, target = None):
         if target == None:
             raise BaseException     #todo: make Coup-specific exception on missing target
+        if player.coins < 2:
+            raise BaseException     #todo: make Coup-specific exception on not enough coins
             
+        player.coins -= 2
         target.loseInfluence()
         
         return True, "Success"

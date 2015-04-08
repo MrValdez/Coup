@@ -106,7 +106,7 @@ class ActionBlocks(unittest.TestCase):
         def confirmBlock(self, action): return True
 
     class NeverBlockingPlayer(Player):
-        def confirmBlock(self, action): return False
+        def confirmBlock(self, action): return None
             
     def test_SelfBlocking(self):
         """ Make sure that player can't block themselves """
@@ -130,7 +130,7 @@ class ActionBlocks(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         
         self.assertFalse(status, response)
-        expectedMessage = "Blocked by %s" % player_blocker
+        expectedMessage = "Blocked by %s" % player_blocker.name
         self.assertEqual(response, expectedMessage)
 
     def test_BlockingAction_NoResponse(self):
@@ -143,6 +143,7 @@ class ActionBlocks(unittest.TestCase):
 
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)        
+        print(status,response)
         self.assertEqual(player.coins, 4)
         
         self.assertTrue(status)
@@ -167,11 +168,27 @@ class CallBluff(unittest.TestCase):
         GameState.reset()
 
     class AlwaysCallingPlayer(Player):
-        def confirmCall(self, action): return True
+        def confirmCall(self, activePlayer, action): return True
+
+    def test_SelfCalling(self):
+        """ Make sure that player can't call themselves as bluffers"""
+        class GenericCardThatCanBlockItself(action.Action):
+            name = "Generic Card That Can Block Itelf"
+            description = "For testing purposes"
+            
+            def play(self, player, target = None):
+                player.coins += 1
+                return True, "Success"
+
+        player = ActionBlocks.AlwaysBlockingPlayer()
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(GenericCardThatCanBlockItself)
+        self.assertEqual(player.coins, 3)
     
     def test_CallActivePlayerBluff_Success(self):
         """ Test if other players can call active player's bluff """
-        player           = self.player
+        player = self.player
         player.giveCards(action.Income)      #todo: add mock object for action
         self.assertEqual(len(player.influence), 2)
         
@@ -189,7 +206,7 @@ class CallBluff(unittest.TestCase):
 
     def test_CallActivePlayerBluff_Failed(self):
         """ Test if other players can call active player's bluff """
-        player           = self.player
+        player = self.player
         player.giveCards(action.ForeignAid)
         self.assertEqual(len(player.influence), 2)
         

@@ -4,6 +4,8 @@ import random
 
 class Player():
     def __init__(self):
+        self.name = "Noname"
+        
         self.coins = 2
         self.alive = True
         self.influence = [Action, Action]
@@ -35,21 +37,31 @@ class Player():
     def play(self, action, target = None):
         """
         1. Check if a player wants to block
-        2. Check if active player wants to call bluff from blocking player  (todo: official rules says any play can call bluff. implement later)
-        3. Check if any player wants to call bluff from active player
-        3.a. If someone call the bluff, reveal card. 
-             If card is the action played, remove influence from player.
-             Else, remove influence from calling player        
+           a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
+        2. Check if any player wants to call bluff from active player
+           a. If active want to call bluff, do Call step
         4. Play action if successful
+        Call step: If someone call the bluff, reveal card. 
+                   If card is the action played, remove influence from player.
+                   Else, remove influence from calling player        
         """
         
         # Step 1
-        blockingPlayer = GameState.requestBlocks(self, action)
+        blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
         
         if blockingPlayer != None:
-           # Step 2
-           message = "Blocked by %s" % blockingPlayer
-           return False, message
+            # Step 1.a
+            if self.confirmCall(blockingPlayer, blockingAction):
+                if blockingAction in blockingPlayer:
+                    self.loseInfluence()
+                    message = "Player %s has %s. Player %s loses influence." % (blockingPlayer.name, blockingAction.name, self.name)
+                    blockingPlayer.changeCard(blockingAction)
+                    return False, message
+                else:
+                    blockingPlayer.loseInfluence()
+            else:
+                message = "Blocked by %s" % blockingPlayer.name
+                return False, message
         
         # Step 3
         callingPlayer = GameState.requestCallForBluffs(self, action)
@@ -72,12 +84,12 @@ class Player():
         if not len(self.influence):
             self.alive = False            
             
-    def confirmCall(self, action):
-        """ return True if player confirms call. returns False if player allows action. """
+    def confirmCall(self, activePlayer, action): 
+        """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
         # todo: raise notImplemented. should be overriden
         return False
             
     def confirmBlock(self, action):
-        """ returns True if player blocks action. return False if player allows action. """
+        """ returns action used by player to blocks action. return None if player allows action. """
         # todo: raise notImplemented. should be overriden
-        return False
+        return None

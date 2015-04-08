@@ -8,12 +8,17 @@ class GameState:
     def requestBlocks(self, activePlayer, action):
         """ 
         Ask each player if they want to block active player's action.
-        If someone wants to block, return the player. Else, return None
+        If someone wants to block, return the tuple (player, action). Else, return (None, None)
         """
         for player in self.PlayerList:
-            if player == activePlayer: continue
-            if player.confirmBlock(action): return player
-        return None
+            if player == activePlayer: 
+                continue
+            
+            blockingAction = player.confirmBlock(action)
+            if blockingAction != None: 
+                return player, blockingAction
+            
+        return None, None
 
     def requestCallForBluffs(self, activePlayer, action):
         """ 
@@ -22,7 +27,7 @@ class GameState:
         """
         for player in self.PlayerList:
             if player == activePlayer: continue
-            if player.confirmCall(action): return player
+            if player.confirmCall(activePlayer, action): return player
         return None
         
 GameState = GameState()     # global variable

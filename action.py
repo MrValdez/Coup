@@ -1,3 +1,7 @@
+# Actions available:
+#   Income
+#   ForeignAid
+
 class Action:
     name = ""
     description = ""
@@ -15,3 +19,10 @@ class Income(Action):
     
     def play(self, player, target = None):
         player.coins += 1
+        
+class ForeignAid(Action):
+    name = "Foreign Aid"
+    description = "Gain 2 gold"
+    
+    def play(self, player, target = None):
+        player.coins += 2

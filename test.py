@@ -3,16 +3,21 @@ import action
 from player import Player
 
 class Actions(unittest.TestCase):
-    def test_IncomeAction(self):
-        player = Player()
+    def setUp(self):
+        self.player = Player()
+        self.assertEqual(self.player.coins, 2)
+
+    def test_Income(self):
+        player = self.player
         
-        #print("Income is ", player.coins)
-        
-        self.assertEqual(player.coins, 2)
         player.play(action.Income)
         self.assertEqual(player.coins, 3)
+            
+    def test_ForeignAid(self):
+        player = self.player
         
-        #print("Income is now ", player.coins)
+        player.play(action.ForeignAid)
+        self.assertEqual(player.coins, 4)
     
 if __name__ == "__main__":
     unittest.main()

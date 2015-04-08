@@ -8,7 +8,6 @@ class GameState:
     def reset(self):
         self.PlayerList = []
         self.Deck = []
-        self.Deck = [action.Income] * 3    # test code
 
     def requestBlocks(self, activePlayer, action):
         """ 
@@ -44,6 +43,8 @@ class GameState:
         self.Deck.append(card)
     
     def DrawCard(self):
+        if not len(self.Deck): return False
+        
         card = random.choice(self.Deck)
         self.Deck.remove(card)
         return card

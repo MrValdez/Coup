@@ -78,7 +78,7 @@ class Player():
         return status, response
     
     def loseInfluence(self):
-        loses = random.choice(self.influence)  # todo: change from random choice to player choice
+        loses = self.selectInfluenceToDie()
     
         self.influence.remove(loses)
         if not len(self.influence):
@@ -94,12 +94,18 @@ class Player():
         # todo: raise notImplemented. should be overriden
         return None
         
+    def selectInfluenceToDie(self):
+        """ select an influence to die. returns the value from the influence list. """
+        # todo: raise notImplemented. should be overriden by the input class
+        return random.choice(self.influence)  # todo: change from random choice to player choice
+        
     def changeCard(self, card):
         """
         change card to a new card from the player deck. This is called when a card is exposed after a call for bluff.
         """
         if not card in self.influence:
-            raise "%s is not found in player's influence. Something went wrong" % card
+            # todo: create a Coup-specific exception
+            raise BaseException("%s is not found in player's influence. Something went wrong" % card)
             
         self.influence.remove(card)
         GameState.AddToDeck(card)

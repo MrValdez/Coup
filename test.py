@@ -85,14 +85,79 @@ class Players(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         self.assertTrue(player.alive)        
     
-    def test_GiveCards(self):
+    def test_CourtDeck(self):
         """ 
-        Test to check if one card or two cards can be given to someone with:
-         - two influence
-         - one influence
-         - no influence
+        Tests related to the court deck found in GameState class.
+            Card Drawing 
+            Drawing card from an empty deck (should return False)
+            Returning card to deck
         """
-        self.fail("not yet implemented")
+        GameState.Deck = [action.Income]
+        card = GameState.DrawCard()
+        
+        self.assertEqual(len(GameState.Deck), 0)
+        self.assertEqual(action.Income, card)
+
+        card = GameState.DrawCard()        
+        self.assertFalse(card)
+
+        GameState.AddToDeck(action.ForeignAid)
+        
+        self.assertEqual(len(GameState.Deck), 1)
+        self.assertIn(action.ForeignAid, GameState.Deck)
+        
+    def test_PlayerChangeCard(self):
+        """
+        Tests releated to the ChangeCard in Player class:
+         - player has two influences
+         - player has one influence
+         - player has no influence
+        """
+        class FirstInfluenceDies(Player):
+            def selectInfluenceToDie(self):
+                return self.influence[0]
+
+        player = FirstInfluenceDies()
+        player.influence = [action.Income, action.ForeignAid]
+        
+        # changing card that is not in the player's influence.
+        card = action.Duke
+        with self.assertRaises(BaseException):
+            player.changeCard(card)
+        
+        # drawing from an empty deck. In normal play, this will never happen, but is tested nonetheless
+        GameState.Deck = []
+        player.changeCard(action.Income)
+        self.assertEqual(len(GameState.Deck), 0)
+        
+        # one card in the deck.
+        GameState.Deck = [action.Duke]
+        player.changeCard(action.Income)
+        
+        # because there's only one card in the deck, either the duke or income will be taken.
+        # todo: add code to take over the rng for testing purposes
+        self.assertTrue ((action.Duke in GameState.Deck) or (action.Income in GameState.Deck))
+        self.assertEqual(len(GameState.Deck), 1)
+        
+        GameState.Deck = [action.Duke]
+        player.influence = [action.Income, action.ForeignAid]
+        player.loseInfluence()
+        self.assertEqual(len(player.influence), 1)
+        self.assertTrue(player.influence[0] == action.ForeignAid)
+        player.changeCard(player.influence[0])
+
+        # because there's only one card in the deck, either the duke or income will be taken.
+        # todo: add code to take over the rng for testing purposes
+        self.assertTrue ((action.Duke in GameState.Deck) or (action.ForeignAid in GameState.Deck))
+        self.assertEqual(len(GameState.Deck), 1)
+
+        # player should be dead
+        player.loseInfluence()
+        self.assertFalse(player.alive)
+        self.assertEqual(len(player.influence), 0)
+        with self.assertRaises(BaseException):
+            player.changeCard(player.influence[0])
+        
     
 class BlockingSystem(unittest.TestCase):
     def setUp(self):

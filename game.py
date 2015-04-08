@@ -1,4 +1,3 @@
-import action
 import random
 
 class GameState:
@@ -40,6 +39,7 @@ class GameState:
         return None
 
     def AddToDeck(self, card):
+        # todo: add error handling
         self.Deck.append(card)
     
     def DrawCard(self):

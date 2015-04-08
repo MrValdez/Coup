@@ -46,6 +46,9 @@ class Player():
                    Else, remove influence from calling player        
         """
         
+        if not self.alive:
+            raise BaseException     # todo: add Coup-specific exception where a dead player is playing an action
+        
         # Step 1
         blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
         
@@ -98,6 +101,18 @@ class Player():
         """ select an influence to die. returns the value from the influence list. """
         # todo: raise notImplemented. should be overriden by the input class
         return random.choice(self.influence)  # todo: change from random choice to player choice
+        
+    def selectAmbassadorInfluence(self, choices, influenceRemaining):
+        """ returns one or two cards from the choices. """
+        # todo: raise notImplemented. should be overriden by the input class
+        
+        selected = []
+        for i in range(influenceRemaining):
+            card = random.choice(choices)
+            selected.append(card)
+            choices.remove(card)
+            
+        return selected
         
     def changeCard(self, card):
         """

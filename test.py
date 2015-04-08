@@ -14,13 +14,13 @@ class Actions(unittest.TestCase):
     def test_Income(self):
         player = self.player
         
-        player.play(action.Income)
+        status, response = player.play(action.Income)
         self.assertEqual(player.coins, 3)
             
     def test_ForeignAid(self):
         player = self.player
         
-        player.play(action.ForeignAid)
+        status, response = player.play(action.ForeignAid)
         self.assertEqual(player.coins, 4)
     
     def test_Coup(self):
@@ -63,7 +63,7 @@ class Actions(unittest.TestCase):
     def test_Duke(self):
         player = self.player
         
-        player.play(action.Duke)
+        status, response = player.play(action.Duke)
         self.assertEqual(player.coins, 5)
 
     def test_Captain(self):
@@ -71,7 +71,7 @@ class Actions(unittest.TestCase):
         player2 = Player()
         
         with self.assertRaises(BaseException):
-            player.play(action.Captain)
+            status, response = player.play(action.Captain)
         self.assertEqual(player.coins, 2)
         self.assertEqual(player2.coins, 2)
 
@@ -93,7 +93,7 @@ class Actions(unittest.TestCase):
         
         # using Contessa as an action
         with self.assertRaises(BaseException):
-            player.play(action.Contessa)
+            status, response = player.play(action.Contessa)
             
         # using Contessa as a block
         class BlockWithContessa(Player):
@@ -102,7 +102,7 @@ class Actions(unittest.TestCase):
                 
         player2 = BlockWithContessa()
         
-        player.play(action.Assassin, player2)
+        status, response = player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 2)
         
     def test_Assasin(self):
@@ -110,13 +110,77 @@ class Actions(unittest.TestCase):
         player2 = Player()
         
         self.assertEqual(len(player2.influence), 2)
-        player.play(action.Assassin, player2)
+        
+        status, response = player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 1)
-        player.play(action.Assassin, player2)
+        
+        status, response = player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
         
+    def test_Ambassador(self):        
+        class AmbassadorTester(Player):
+            def __init__(self, CardToPick):
+                self.CardToPick = CardToPick
+                Player.__init__(self)
+                
+            def selectAmbassadorInfluence(self, choices, influenceRemaining):
+                return self.CardToPick
+                
+        # test with player having two influence
+        player              = AmbassadorTester([action.Duke, action.ForeignAid])
+        player.influence    = [action.Income, action.ForeignAid]
+        GameState.Deck      = [action.Duke, action.Ambassador]
+        
+        status, response    = player.play(action.Ambassador)
+        
+        self.assertIn(action.Duke,       player.influence)
+        self.assertIn(action.ForeignAid, player.influence)
+        self.assertIn(action.Income,     GameState.Deck)
+        self.assertIn(action.Ambassador, GameState.Deck)
+        
+        # test with player having one influence
+        player              = AmbassadorTester(action.Duke)
+        player.influence    = [action.Income]
+        GameState.Deck      = [action.Duke, action.Ambassador]
+        
+        status, response    = player.play(action.Ambassador)
+        self.assertIn(action.Duke,       player.influence)
+        self.assertIn(action.Income,     GameState.Deck)
+        self.assertIn(action.Ambassador, GameState.Deck)
 
+        # test duplicates
+        player = Player()
+        player.influence    = [action.Ambassador]
+        GameState.Deck      = [action.Ambassador, action.Ambassador]
+        status, response    = player.play(action.Ambassador)
+        
+        self.assertEqual(player.influence[0], action.Ambassador)
+        self.assertEqual(GameState.Deck[0], action.Ambassador)
+        self.assertEqual(GameState.Deck[1], action.Ambassador)
+
+        class AmbassadorCheaterTester(Player):
+            def __init__(self, CardToPick):
+                self.CardToPick = CardToPick
+                Player.__init__(self)
+                
+            def selectAmbassadorInfluence(self, choices, influenceRemaining):
+                return self.CardToPick
+        
+        # test with player cheating by selecting a card that is not in the choices
+        player              = AmbassadorCheaterTester([action.Contessa, action.Contessa])
+        player.influence    = [action.Income, action.ForeignAid]
+        GameState.Deck      = [action.Duke, action.Ambassador]
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Ambassador)
+        
+        # test with player cheating by having just one influence but selecting two
+        player              = AmbassadorCheaterTester([action.Duke, action.Ambassador])
+        player.influence    = [action.Income]
+        GameState.Deck      = [action.Duke, action.Ambassador]
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Ambassador)
+        
 class Players(unittest.TestCase):
     def setUp(self):
         GameState.PlayerList = []
@@ -135,6 +199,14 @@ class Players(unittest.TestCase):
         
         self.assertEqual(player.coins, 2)
         self.assertTrue(player.alive)        
+    
+    def test_DeadPlayerPlaying(self):
+        """ test to make sure a dead player can't play an action """
+        player = self.player
+        player.alive = False
+        
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Income)
     
     def test_CourtDeck(self):
         """ 

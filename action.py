@@ -6,10 +6,12 @@
 #   Captain
 #   Contessa
 #   Assassin
+#   Ambassador
 
 # to be implemented:
-#   Ambassador
 #   Forced Coup
+
+from game import GameState
 
 class Action:
     name = ""
@@ -112,3 +114,46 @@ class Assassin(Action):
         
         return True, "Success"
         
+class Ambassador(Action):
+    name = "Ambassador"
+    description = "Exchange your influence with 2 cards from the Court Deck. Blocks Steal."
+    blocks = ["Captain"]
+            
+    def play(self, player, target = None):
+        influenceRemaining = len(player.influence)
+        choices = list(player.influence)
+        
+        deckCards = [GameState.DrawCard(), GameState.DrawCard()]
+        choices.append(deckCards[0])
+        choices.append(deckCards[1])
+        
+        newInfluence = player.selectAmbassadorInfluence(list(choices), influenceRemaining)
+        if type(newInfluence) != list:
+            newInfluence = [newInfluence]
+        
+        def ReturnCards():
+            GameState.AddToDeck(deckCards[0])
+            GameState.AddToDeck(deckCards[1])
+            raise BaseException     #todo: make Coup-specific exception to select new cards for Ambassador
+            
+        if len(newInfluence) != influenceRemaining:
+            # There is a missing card. Try again.
+            ReturnCards()
+        
+        for card in newInfluence:
+            if not card in choices:
+                # something is wrong. The player sent a card choice that is not part of the original choices.
+                # try again.
+                ReturnCards()
+        
+        # give the player their new cards        
+        player.influence = list(newInfluence)
+
+        # return the unselected cards back to the Court Deck.
+        for card in newInfluence:
+            choices.remove(card)
+               
+        for card in choices:
+            GameState.AddToDeck(card)
+        
+        return True, "Success"

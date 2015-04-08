@@ -1,14 +1,15 @@
 import unittest
-import main
+import action
+from player import Player
 
 class Actions(unittest.TestCase):
     def test_IncomeAction(self):
-        player = main.Player()
+        player = Player()
         
         #print("Income is ", player.coins)
         
         self.assertEqual(player.coins, 2)
-        player.play(main.Income)
+        player.play(action.Income)
         self.assertEqual(player.coins, 3)
         
         #print("Income is now ", player.coins)

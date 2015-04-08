@@ -3,6 +3,13 @@
 #   Foreign Aid
 #   Coup
 #   Duke
+#   Captain
+
+# to be implemented:
+#   Contessa
+#   Ambassador
+#   Assassin
+#   Forced Coup
 
 class Action:
     name = ""
@@ -57,8 +64,29 @@ class Coup(Action):
 class Duke(Action):
     name = "Duke"
     description = "Gain 3 gold. Blocks Foreign Aid."
-    blocks = [ForeignAid]
+    blocks = ["Foreign Aid"]
             
     def play(self, player, target = None):
         player.coins += 3
+        return True, "Success"
+        
+class Captain(Action):
+    name = "Captain"
+    description = "Steal 2 gold from target. Blocks Steal."
+    blocks = ["Captain"]
+            
+    def play(self, player, target = None):
+        if target == None:
+            raise BaseException     #todo: make Coup-specific exception on missing target
+    
+        steal = 0
+        if target.coins >= 2:
+            steal = 2
+        elif target.coins == 1:
+            steal = 1
+            
+        target.coins -= steal
+        if target.coins < 0: target.coins = 0
+        player.coins += steal
+        
         return True, "Success"

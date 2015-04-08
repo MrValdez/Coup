@@ -66,6 +66,28 @@ class Actions(unittest.TestCase):
         player.play(action.Duke)
         self.assertEqual(player.coins, 5)
 
+    def test_Captain(self):
+        player  = self.player
+        player2 = Player()
+        
+        with self.assertRaises(BaseException):
+            player.play(action.Captain)
+        self.assertEqual(player.coins, 2)
+        self.assertEqual(player2.coins, 2)
+
+        player.play(action.Captain, player2)
+        self.assertEqual(player.coins, 4)
+        self.assertEqual(player2.coins, 0)
+
+        player.play(action.Captain, player2)
+        self.assertEqual(player.coins, 4)
+        self.assertEqual(player2.coins, 0)
+
+        player2.coins = 1
+        player.play(action.Captain, player2)
+        self.assertEqual(player.coins, 5)
+        self.assertEqual(player2.coins, 0)
+
 class Players(unittest.TestCase):
     def setUp(self):
         GameState.PlayerList = []
@@ -315,6 +337,17 @@ class ActionBlocking(unittest.TestCase):
         status, response = player.play(action.ForeignAid)
         self.assertFalse(status, response)                
         self.assertEqual(player.coins, 2)
+
+    def test_Captain(self):
+        """ Test for players blocking stealing """
+        #todo: use a mock object to create a mock action that is blockable
+        player            = self.player
+        player_blocker    = ActionBlocking.AlwaysBlockingPlayer(action.Captain)
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.Captain, player_blocker)
+        self.assertFalse(status, response)                
+        self.assertEqual(player.coins, 2)
         
     # todo: add tests for all cards
 
@@ -387,5 +420,9 @@ class CallBluff(unittest.TestCase):
         self.assertEqual(len(player.influence), 2)
         self.assertTrue(status)
         
+    def test_Assasinate_FailedContessaBluff(self):
+        """ Important rule test: An assasination attempt is done to opponent. Opponent bluff with Contessa. Active player calls bluff. The opposing player should lose. This will test for situations where the opposing player has two or one influence """
+        self.fail("Not yet implemented")
+    
 if __name__ == "__main__":
     unittest.main()

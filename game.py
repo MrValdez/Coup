@@ -22,7 +22,7 @@ class GameState:
             
             if blockingAction != None: 
                 # check that the block is valid
-                if not action in blockingAction.blocks:
+                if not action.name in blockingAction.blocks:
                     continue       
             
                 return player, blockingAction

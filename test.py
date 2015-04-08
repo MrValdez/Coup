@@ -99,6 +99,10 @@ class ActionBlocks(unittest.TestCase):
     class NeverBlockingPlayer(Player):
         def confirmBlock(self, action): return False
             
+    def test_SelfBlocking(self):
+        """ Make sure that player can't block themselves """
+        self.assertRaises("Not yet implemented")
+            
     def test_BlockingAction(self):
         """ Test if players can block """
         #todo: use a mock object to create a mock action that is blockable
@@ -115,7 +119,6 @@ class ActionBlocks(unittest.TestCase):
         self.assertFalse(status, response)
         expectedMessage = "Blocked by %s" % player_blocker
         self.assertEqual(response, expectedMessage)
-        
 
     def test_BlockingAction(self):
         """ Test if players can block """
@@ -133,6 +136,7 @@ class ActionBlocks(unittest.TestCase):
     
     def test_ForeignAid(self):
         """ Test for players blocking foriegn aid """
+        #todo: use a mock object to create a mock action that is blockable
         player            = self.player
         player_blocker    = ActionBlocks.AlwaysBlockingPlayer()
         
@@ -140,6 +144,21 @@ class ActionBlocks(unittest.TestCase):
         status, response = player.play(action.ForeignAid)
         self.assertFalse(status, response)                
         self.assertEqual(player.coins, 2)
-                
+
+class CallBluff(unittest.TestCase):
+    def setUp(self):
+        GameState.PlayerList = []
+        self.player = Player()
+        
+    def tearDown(self):
+        GameState.reset()
+
+    class AlwaysCallingPlayer(Player):
+        pass
+    
+    def test_CallActivePlayerBluff(self):
+        player           = self.player
+        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        
 if __name__ == "__main__":
     unittest.main()

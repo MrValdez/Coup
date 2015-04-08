@@ -109,29 +109,30 @@ class Actions(unittest.TestCase):
         player  = self.player
         player2 = Player()
         
+        # test for no player having insufficient money
+        player.coins = 2
+        self.assertEqual(len(player2.influence), 2)
+        status, response = player.play(action.Coup, player2)
+        self.assertFalse(status, response)
+        self.assertEqual(len(player2.influence), 2)
+        self.assertEqual(player.coins, 2)
+        
+        player.coins = 3
         with self.assertRaises(action.TargetRequired):
             status, response = player.play(action.Assassin)
         
         self.assertEqual(len(player2.influence), 2)
-        self.assertEqual(player.coins, 2)
         
+        self.assertEqual(player.coins, 3)
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(player.coins, 0)
         self.assertEqual(len(player2.influence), 1)
         
-        player.coins = 2
+        player.coins = 3
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(player.coins, 0)
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
-
-        player2 = Player()
-        self.assertEqual(player.coins, 0)
-        self.assertEqual(len(player2.influence), 2)
-        with self.assertRaises(BaseException):
-            status, response = player.play(action.Assassin, player2)
-        self.assertEqual(len(player2.influence), 2)
-        self.assertEqual(player.coins, 0)
         
     def test_Ambassador(self):        
         class AmbassadorTester(Player):
@@ -557,6 +558,7 @@ class CallBluff(unittest.TestCase):
         self.assertEqual(len(player2.influence), 2)
         self.assertTrue(player2.alive)
         
+        player.coins = 3
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(player.coins, 0)
 

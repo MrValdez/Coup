@@ -108,16 +108,16 @@ class Contessa(Action):
         
 class Assassin(Action):
     name = "Assassin"
-    description = "Assasinate. Pay 2 coins to kill a player's influence."
+    description = "Assasinate. Pay 3 coins to kill a player's influence."
     blocks = []
             
     def play(self, player, target = None):
         if target == None:
             raise TargetRequired
-        if player.coins < 2:
-            raise BaseException     #todo: make Coup-specific exception on not enough coins
+        if player.coins < 3:
+            return False, "Not enough coins"
             
-        player.coins -= 2
+        player.coins -= 3
         target.loseInfluence()
         
         return True, "Success"

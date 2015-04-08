@@ -299,17 +299,14 @@ class Players(unittest.TestCase):
         player = self.player
         player.coins = 12
         
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.ActionNotAllowed):
             status, response = player.play(action.Income)
+        self.assertEqual(player.coins, 12)
 
-        player.coins = 15
-        
-        with self.assertRaises(BaseException):
+        player.coins = 12
+        player.alive = False
+        with self.assertRaises(action.DeadPlayer):
             status, response = player.play(action.Income)
-
-        player.coins = 11
-        
-        status, response = player.play(action.Income)
         self.assertEqual(player.coins, 12)
             
     

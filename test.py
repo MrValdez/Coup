@@ -5,9 +5,12 @@ from game   import GameState
 
 class Actions(unittest.TestCase):
     def setUp(self):
-        PlayerList = []
+        GameState.PlayerList = []
         self.player = Player()
 
+    def tearDown(self):
+        GameState.reset()
+        
     def test_Income(self):
         player = self.player
         
@@ -57,7 +60,7 @@ class Actions(unittest.TestCase):
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
                 
-    def test_ForeignAid(self):
+    def test_Duke(self):
         player = self.player
         
         player.play(action.Duke)
@@ -68,7 +71,9 @@ class Players(unittest.TestCase):
         GameState.PlayerList = []
         
         self.player = Player()
-        print(self.player.coins)
+
+    def tearDown(self):
+        GameState.reset()
 
     def test_PlayerList(self):
         self.assertEqual(len(GameState.PlayerList), 1)
@@ -80,6 +85,29 @@ class Players(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         self.assertTrue(player.alive)        
     
+class ActionBlocks(unittest.TestCase):
+    def setUp(self):
+        GameState.PlayerList = []
+        self.player = Player()
+        
+    def tearDown(self):
+        GameState.reset()
+        
+    class AlwaysBlockingPlayer(Player):
+        def confirmBlock(self, action):
+            return True
+            
+    def test_ForeignAid(self):
+        """ Test for players blocking foriegn aid """
+        player = self.player
+        player_blocker = ActionBlocks.AlwaysBlockingPlayer()
+        self.assertIn(player_blocker, GameState.PlayerList)
+
+        status, response = player.play(action.ForeignAid)
+        self.assertFalse(status, response)
+        
+        expectedMessage = "Blocked by %s" % player_blocker
+        self.assertEqual(response, expectedMessage)
                 
 if __name__ == "__main__":
     unittest.main()

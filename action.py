@@ -9,19 +9,24 @@ class Action:
     blocks = []
             
     def play(self, player, target = None):
-        # should be overrriden by child classes
-        pass
+        """
+         should be overrriden by child classes
+         returns (status, response) where 
+           status:     True/False if action is successful or not
+           response:   String explaining status. Usually reserved for explanation of why an action failed.
+         Example:
+            return True, "Success"
+            return False, "Failed because it was blocked"
+        """
+        return False, None
         
-    def requestBlocks(self, action):
-        for player in GameState.PlayerList:
-            player.confirmBlock(action)
-
 class Income(Action):
     name = "Income"
     description = "Gain 1 gold"
     
     def play(self, player, target = None):
         player.coins += 1
+        return True, "Success"
         
 class ForeignAid(Action):
     name = "Foreign Aid"
@@ -29,6 +34,7 @@ class ForeignAid(Action):
     
     def play(self, player, target = None):
         player.coins += 2
+        return True, "Success"
         
 class Coup(Action):
     name = "Coup"
@@ -54,3 +60,4 @@ class Duke(Action):
             
     def play(self, player, target = None):
         player.coins += 3
+        return True, "Success"

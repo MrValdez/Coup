@@ -9,6 +9,14 @@ Players = []
 PlayersAlive = []
 CurrentPlayer = 0
 
+AvailableActions = []
+def SetupActions():
+    global AvailableActions
+    for action in GameState.CommonActions:
+        AvailableActions.append(action)
+    for action in GameState.CardsAvailable:
+        AvailableActions.append(action)
+
 def Setup():
     # How many people are playing?
     # Generate the player list
@@ -34,6 +42,8 @@ def Setup():
 
     global PlayersAlive
     PlayersAlive = [player for player in Players if player.alive]
+    
+    SetupActions()
 
 def PrintTurnOrder():
     print ("Turn order:")
@@ -52,36 +62,51 @@ def MainLoop():
     global PlayersAlive, CurrentPlayer
     
     while len(PlayersAlive) > 1:
+        player = Players[CurrentPlayer]
+        
         def PrintInfo():
             os.system("cls")
-            player = Players[CurrentPlayer]
             print("%s's turn" % player.name)
-            print ("=================\n ")
+            print(" Coins: %i" % player.coins)
+            print("=================\n ")
             PrintDeckList()
             print("\nCards in hand of %s: " % (player.name), end = "")
-            print (" and ".join([card.name for card in player.influence]))
+            print(" and ".join([card.name for card in player.influence]))
             print()
-        
+
         def PrintActions():
             print("Available actions:")
-            i = 1
-            for action in GameState.CommonActions:
-                print (" %i: %s" % (i, action.name))
-                i += 1
-            for action in GameState.CardsAvailable:
-                print (" %i: %s" % (i, action.name))
-                i += 1
+            for i, action in enumerate(AvailableActions):
+                print (" %i: %s" % (i + 1, action.name))
         
         def Cleanup():
             global CurrentPlayer
             CurrentPlayer += 1
             if CurrentPlayer >= len(Players): CurrentPlayer = 0
             PlayersAlive = [player for player in Players if player.alive]
+        
+        def ChooseAction():    
+            action = input ("Action > ")
+            if not action.isnumeric():
+                ChooseAction()
+                return
+            action = int(action) - 1
             
+            if not (action >= 0 and action < len(AvailableActions)):
+                ChooseAction()
+                return
+            
+            print("Playing %s" % AvailableActions[action].name)
+            status, response = player.play(AvailableActions[action])
+            if status == False:
+                print (response)
+                ChooseAction()
+        
         PrintInfo()
         PrintActions()
-        input ("Action > ")
+        ChooseAction()
         Cleanup()
+        input("\nPress enter key to continue...")
         
     print("\nThe winner is %s" % (PlayersAlive[0].name))
 

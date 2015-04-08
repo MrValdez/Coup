@@ -124,17 +124,13 @@ class BlockingSystem(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)
         self.assertNotEqual(player.coins, 2)
-    
-    def test_ValidBlockAction(self):
-        """ Only actions that can block active player's action can be used. This test check that. """
-        self.fail("not yet implemented")
-    
+        
     def test_BlockingAction(self):
         """ Test if players can block """
         #todo: use a mock object to create a mock action that is blockable
         
         player            = self.player
-        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.ForeignAid)
+        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.Duke)
         
         self.assertIn(player_blocker, GameState.PlayerList)
 
@@ -156,10 +152,20 @@ class BlockingSystem(unittest.TestCase):
 
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)        
-        print(status,response)
         self.assertEqual(player.coins, 4)
         
         self.assertTrue(status)
+
+    def test_ValidBlockAction_Fail(self):
+        """ Only actions that can block active player's action can be used. This test checks that if an invalid block is used, nothing happens. """
+        player            = self.player
+        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.ForeignAid)
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)
+        self.assertEqual(player.coins, 4)
+        self.assertTrue(status)
+        
     
     def test_CallBlockingActionAsBluff_Success(self):
         """ 
@@ -221,7 +227,12 @@ class ActionBlocking(unittest.TestCase):
         GameState.reset()
         
     class AlwaysBlockingPlayer(Player):
-        def confirmBlock(self, action): return True
+        def __init__(self, CardUsedToBlock):
+            self.CardUsedToBlock = CardUsedToBlock
+            Player.__init__(self)
+            
+        def confirmBlock(self, action): 
+            return self.CardUsedToBlock
 
     class NeverBlockingPlayer(Player):
         def confirmBlock(self, action): return None
@@ -233,7 +244,7 @@ class ActionBlocking(unittest.TestCase):
         """ Test for players blocking foriegn aid """
         #todo: use a mock object to create a mock action that is blockable
         player            = self.player
-        player_blocker    = ActionBlocking.AlwaysBlockingPlayer()
+        player_blocker    = ActionBlocking.AlwaysBlockingPlayer(action.Duke)
         
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)
@@ -254,7 +265,12 @@ class CallBluff(unittest.TestCase):
         def confirmCall(self, activePlayer, action): return True
 
     class AlwaysBlockingPlayer(Player):
-        def confirmBlock(self, action): return True
+        def __init__(self, CardUsedToBlock):
+            self.CardUsedToBlock = CardUsedToBlock
+            Player.__init__(self)
+            
+        def confirmBlock(self, action): 
+            return self.CardUsedToBlock
 
     def test_SelfCalling(self):
         """ Make sure that player can't call themselves as bluffers"""
@@ -266,7 +282,7 @@ class CallBluff(unittest.TestCase):
                 player.coins += 1
                 return True, "Success"
 
-        player = CallBluff.AlwaysBlockingPlayer()
+        player = CallBluff.AlwaysBlockingPlayer(GenericCardThatCanBlockItself)
         
         self.assertEqual(player.coins, 2)
         status, response = player.play(GenericCardThatCanBlockItself)

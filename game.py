@@ -20,7 +20,12 @@ class GameState:
                 continue
             
             blockingAction = player.confirmBlock(action)
+            
             if blockingAction != None: 
+                # check that the block is valid
+                if not action in blockingAction.blocks:
+                    continue       
+            
                 return player, blockingAction
             
         return None, None

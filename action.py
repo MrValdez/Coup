@@ -1,5 +1,6 @@
 # Coup specific exceptions
 #   TargetRequired
+#   BlockOnly
 
 # Actions implemented:
 #   Income
@@ -14,6 +15,7 @@
 from game import GameState
 
 class TargetRequired(Exception):   pass
+class BlockOnly(Exception):   pass
 
 class Action:
     name = ""
@@ -104,7 +106,7 @@ class Contessa(Action):
     blocks = ["Assassin"]
             
     def play(self, player, target = None):
-        raise BaseException     #todo: make Coup-specific exception on Contessa un-usable as an action
+        raise BlockOnly
         
 class Assassin(Action):
     name = "Assassin"

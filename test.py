@@ -92,7 +92,7 @@ class Actions(unittest.TestCase):
         player = self.player
         
         # using Contessa as an action
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.BlockOnly):
             status, response = player.play(action.Contessa)
             
         # using Contessa as a block

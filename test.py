@@ -35,11 +35,11 @@ class Actions(unittest.TestCase):
         player.coins = 6
         status, response = player.play(action.Coup, player2)
         self.assertFalse(status, response)
-        
-        # test for target being dead
-        player2.alive = False
-        status, response = player.play(action.Coup, player2)
-        self.assertFalse(status, response)
+                
+        # test for targetting self
+        player.coins = 7
+        with self.assertRaises(action.TargetRequired):
+            status, response = player.play(action.Coup, player)        
         
         # test for succesful coup with opponent has 2 influence
         player2.alive = True
@@ -70,19 +70,22 @@ class Actions(unittest.TestCase):
         player  = self.player
         player2 = Player()
         
+        # test for no target
         with self.assertRaises(action.TargetRequired):
             status, response = player.play(action.Captain)
         self.assertEqual(player.coins, 2)
         self.assertEqual(player2.coins, 2)
+        
+        # test for targeting self
+        with self.assertRaises(action.TargetRequired):
+            status, response = player.play(action.Captain, player)
 
+        # test for steal from player 2
         player.play(action.Captain, player2)
         self.assertEqual(player.coins, 4)
         self.assertEqual(player2.coins, 0)
 
-        player.play(action.Captain, player2)
-        self.assertEqual(player.coins, 4)
-        self.assertEqual(player2.coins, 0)
-
+        # test for steal with only one coin
         player2.coins = 1
         player.play(action.Captain, player2)
         self.assertEqual(player.coins, 5)
@@ -219,9 +222,18 @@ class Players(unittest.TestCase):
         player = self.player
         player.alive = False
         
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.DeadPlayer):
             status, response = player.play(action.Income)
-    
+
+    def test_DeadPlayerTarget(self):
+        """ test to make sure a dead player can't be targetted """
+        player = self.player
+        player2 = Player()
+        player2.alive = False
+        
+        with self.assertRaises(action.DeadPlayer):
+            status, response = player.play(action.Captain, player2)
+        
     def test_CourtDeck(self):
         """ 
         Tests related to the court deck found in GameState class.

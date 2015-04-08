@@ -1,4 +1,4 @@
-from action import Action, Coup, DeadPlayer, ActionNotAllowed
+from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired
 from game import GameState
 import random
 
@@ -54,8 +54,11 @@ class Player():
                    If card is the action played, remove influence from player.
                    Else, remove influence from calling player        
         """        
-        if not self.alive:
+        if not self.alive or (target != None and not target.alive):
             raise DeadPlayer
+            
+        if target == self:
+            raise TargetRequired
         
         if self.coins >= 12 and action != Coup:
             raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))

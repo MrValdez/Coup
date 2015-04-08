@@ -76,7 +76,7 @@ class Coup(Action):
         # target should be alive
         if target == None:
             raise TargetRequired
-            
+                        
         if not target.alive:
             return False, "Invalid target"
             

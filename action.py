@@ -26,3 +26,20 @@ class ForeignAid(Action):
     
     def play(self, player, target = None):
         player.coins += 2
+        
+class Coup(Action):
+    name = "Coup"
+    description = "Pay 7 gold to remove target player's influence"
+    
+    def play(self, player, target = None):
+        # player should have 7 coins. 
+        if player.coins < 7:
+            return False, "Not enough coins"
+            
+        # target should be alive
+        if target == None or not target.alive:
+            return False, "Invalid target"
+            
+        player.coins -= 1
+        target.loseInfluence()
+        return True, "Success"

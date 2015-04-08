@@ -5,6 +5,36 @@ from game   import GameState
 import random
 import os
 
+class ConsolePlayer(Player):
+    def selectAmbassadorInfluence(self, choices, influenceRemaining):
+        finalChoices = []
+        
+        def askChoice(choices):
+            for i, choice in enumerate(choices):
+                print ("%i: %s" % (i + 1, choice.name))
+            card = input ("Select a card> ")
+            
+            if not card.isnumeric():
+                return askChoice(choices)
+                
+            card = int(card) - 1
+            if card < 0 or card >= len(choices):
+                return askChoice(choices)
+            
+            card = choices[card]
+            print ("Selected %s" % (card.name))
+            return card
+            
+        card1 = askChoice(choices)
+        choices.remove(card1)
+        
+        if (influenceRemaining == 1):
+            return [card1]
+        else:
+            card2 = askChoice(choices)
+            return [card1, card2]
+        
+
 Players = []
 PlayersAlive = []
 CurrentPlayer = 0
@@ -27,7 +57,7 @@ def Setup():
     PlayerCount = 2
 
     def CreatePlayer(Number):
-        player = Player()
+        player = ConsolePlayer()
         
         print("Creating Player #%i" % (Number + 1))
         #player.name = input(" What is your name? ")
@@ -108,7 +138,7 @@ def MainLoop():
                     if not target.isnumeric():
                         return ChooseTarget()
                     target = int(target) - 1
-                    if target < 0 or target > len(Players):
+                    if target < 0 or target >= len(Players):
                         return ChooseTarget()
                     
                     return target

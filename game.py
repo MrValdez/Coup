@@ -1,12 +1,18 @@
 import random
 
+import action
+
 class GameState:
-    def __init__(self):
-        self.reset()
+#    def __init__(self):
+#        self.reset()
         
     def reset(self):
         self.PlayerList = []
-        self.Deck = []
+        
+        self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
+        self.CardsAvailable = [action.Duke, action.Captain, action.Contessa, action.Assassin, action.Ambassador]
+        self.Deck = self.CardsAvailable * 3
+        random.shuffle(self.Deck)
 
     def requestBlocks(self, activePlayer, action):
         """ 
@@ -48,5 +54,5 @@ class GameState:
         card = random.choice(self.Deck)
         self.Deck.remove(card)
         return card
-                
+
 GameState = GameState()     # global variable

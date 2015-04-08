@@ -5,11 +5,9 @@ from game   import GameState
 
 class Actions(unittest.TestCase):
     def setUp(self):
+        GameState.reset()
         GameState.PlayerList = []
         self.player = Player()
-
-    def tearDown(self):
-        GameState.reset()
         
     def test_Income(self):
         player = self.player
@@ -195,12 +193,10 @@ class Actions(unittest.TestCase):
         
 class Players(unittest.TestCase):
     def setUp(self):
+        GameState.reset()
         GameState.PlayerList = []
         
         self.player = Player()
-
-    def tearDown(self):
-        GameState.reset()
 
     def test_PlayerList(self):
         self.assertEqual(len(GameState.PlayerList), 1)
@@ -313,11 +309,9 @@ class Players(unittest.TestCase):
     
 class BlockingSystem(unittest.TestCase):
     def setUp(self):
+        GameState.reset()
         GameState.PlayerList = []
         self.player = Player()
-        
-    def tearDown(self):
-        GameState.reset()
         
     class AlwaysBlockingPlayer(Player):
         def __init__(self, CardUsedToBlock):
@@ -437,11 +431,9 @@ class BlockingSystem(unittest.TestCase):
     
 class ActionBlocking(unittest.TestCase):
     def setUp(self):
+        GameState.reset()
         GameState.PlayerList = []
         self.player = Player()
-        
-    def tearDown(self):
-        GameState.reset()
         
     class AlwaysBlockingPlayer(Player):
         def __init__(self, CardUsedToBlock):
@@ -483,11 +475,9 @@ class ActionBlocking(unittest.TestCase):
 
 class CallBluff(unittest.TestCase):
     def setUp(self):
-        GameState.PlayerList = []
-        self.player = Player()
-        
-    def tearDown(self):
         GameState.reset()
+        GameState.PlayerList = []
+        self.player = Player()        
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True

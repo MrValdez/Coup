@@ -4,11 +4,18 @@ import random
 
 class Player():
     def __init__(self):
+        self.reset()
+        
+    def reset(self):
         self.name = "Noname"
         
         self.coins = 2
         self.alive = True
-        self.influence = [Action, Action]
+        
+        card1 = GameState.DrawCard()
+        card2 = GameState.DrawCard()
+        self.influence = [card1, card2]
+        #self.influence = [Action, Action]  # for testing purposes
         
         GameState.PlayerList.append(self)
         

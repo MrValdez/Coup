@@ -24,10 +24,12 @@ class Actions(unittest.TestCase):
     def test_Coup(self):
         player  = self.player
         player2 = Player()
+
         
         # test for no target
-        status, response = player.play(action.Coup)
-        self.assertFalse(status, response)
+        player.coins = 7
+        with self.assertRaises(action.TargetRequired):
+            status, response = player.play(action.Coup)
 
         # test for no player having insufficient money
         player.coins = 6
@@ -68,7 +70,7 @@ class Actions(unittest.TestCase):
         player  = self.player
         player2 = Player()
         
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.TargetRequired):
             status, response = player.play(action.Captain)
         self.assertEqual(player.coins, 2)
         self.assertEqual(player2.coins, 2)
@@ -106,6 +108,9 @@ class Actions(unittest.TestCase):
     def test_Assasin(self):
         player  = self.player
         player2 = Player()
+        
+        with self.assertRaises(action.TargetRequired):
+            status, response = player.play(action.Assassin)
         
         self.assertEqual(len(player2.influence), 2)
         self.assertEqual(player.coins, 2)

@@ -1,4 +1,7 @@
-# Actions available:
+# Coup specific exceptions
+#   TargetRequired
+
+# Actions implemented:
 #   Income
 #   Foreign Aid
 #   Coup
@@ -9,6 +12,8 @@
 #   Ambassador
 
 from game import GameState
+
+class TargetRequired(Exception):   pass
 
 class Action:
     name = ""
@@ -53,10 +58,13 @@ class Coup(Action):
             return False, "Not enough coins"
             
         # target should be alive
-        if target == None or not target.alive:
+        if target == None:
+            raise TargetRequired
+            
+        if not target.alive:
             return False, "Invalid target"
             
-        player.coins -= 1
+        player.coins -= 7
         target.loseInfluence()
         return True, "Success"
 
@@ -76,7 +84,7 @@ class Captain(Action):
             
     def play(self, player, target = None):
         if target == None:
-            raise BaseException     #todo: make Coup-specific exception on missing target
+            raise TargetRequired
     
         steal = 0
         if target.coins >= 2:
@@ -105,7 +113,7 @@ class Assassin(Action):
             
     def play(self, player, target = None):
         if target == None:
-            raise BaseException     #todo: make Coup-specific exception on missing target
+            raise TargetRequired
         if player.coins < 2:
             raise BaseException     #todo: make Coup-specific exception on not enough coins
             

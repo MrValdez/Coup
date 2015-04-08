@@ -134,6 +134,9 @@ def MainLoop():
             print("Playing %s" % AvailableActions[move].name)
             try:
                 status, response = player.play(AvailableActions[move])
+            except action.ActionNotAllowed as e:
+                print(e.message)
+                ChooseAction()
             except action.BlockOnly:
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()

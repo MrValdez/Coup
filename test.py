@@ -88,6 +88,24 @@ class Actions(unittest.TestCase):
         self.assertEqual(player.coins, 5)
         self.assertEqual(player2.coins, 0)
 
+    def test_Contessa(self):
+        player = self.player
+        
+        # using Contessa as an action
+        with self.assertRaises(BaseException):
+            player.play(action.Contessa)
+            
+        # using Contessa as a block
+        class BlockWithContessa(Player):
+            def confirmBlock(self, action): 
+                return action.Contessa
+                
+        player2 = BlockWithContessa()
+        
+        player.play(action.Assassin, player2)
+        self.assertEqual(len(player2.influence), 2)
+        
+
 class Players(unittest.TestCase):
     def setUp(self):
         GameState.PlayerList = []

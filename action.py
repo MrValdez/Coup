@@ -4,9 +4,9 @@
 #   Coup
 #   Duke
 #   Captain
+#   Contessa
 
 # to be implemented:
-#   Contessa
 #   Ambassador
 #   Assassin
 #   Forced Coup
@@ -90,3 +90,12 @@ class Captain(Action):
         player.coins += steal
         
         return True, "Success"
+        
+class Contessa(Action):
+    name = "Contessa"
+    description = "Blocks Assasination."
+    blocks = ["Assassin"]
+            
+    def play(self, player, target = None):
+        raise BaseException     #todo: make Coup-specific exception on Contessa un-usable as an action
+        

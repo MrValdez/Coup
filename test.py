@@ -280,7 +280,24 @@ class Players(unittest.TestCase):
         self.assertEqual(len(player.influence), 0)
         with self.assertRaises(BaseException):
             player.changeCard(player.influence[0])
+
+    def test_ForceCoup(self):
+        player = self.player
+        player.coins = 12
         
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Income)
+
+        player.coins = 15
+        
+        with self.assertRaises(BaseException):
+            status, response = player.play(action.Income)
+
+        player.coins = 11
+        
+        status, response = player.play(action.Income)
+        self.assertEqual(player.coins, 12)
+            
     
 class BlockingSystem(unittest.TestCase):
     def setUp(self):

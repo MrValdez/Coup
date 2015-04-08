@@ -8,9 +8,6 @@
 #   Assassin
 #   Ambassador
 
-# to be implemented:
-#   Forced Coup
-
 from game import GameState
 
 class Action:

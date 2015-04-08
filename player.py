@@ -36,24 +36,28 @@ class Player():
         
     def play(self, action, target = None):
         """
-        1. Check if a player wants to block
+        1. Check if player is alive. If not, throw exception.
+        2. Check if player has at least 12 coins. If they do, throw exception unless coup is played.
+        3. Check if a player wants to block
            a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
-        2. Check if any player wants to call bluff from active player
-           a. If active want to call bluff, do Call step
-        4. Play action if successful
+        4. Check if any player wants to call bluff from active player
+           a. If someone wants to call bluff, do Call step
+        5. Play action if successful
         Call step: If someone call the bluff, reveal card. 
                    If card is the action played, remove influence from player.
                    Else, remove influence from calling player        
-        """
-        
+        """        
         if not self.alive:
             raise BaseException     # todo: add Coup-specific exception where a dead player is playing an action
         
-        # Step 1
+        if self.coins >= 12 and action != action.Coup:
+            raise BaseException     # todo: add Coup-specific exception where the player can only play Coup            
+        
+        # Step 3
         blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
         
         if blockingPlayer != None:
-            # Step 1.a
+            # Step 3.a
             if self.confirmCall(blockingPlayer, blockingAction):
                 if blockingAction in blockingPlayer.influence:
                     self.loseInfluence()
@@ -66,7 +70,7 @@ class Player():
                 message = "Blocked by %s" % blockingPlayer.name
                 return False, message
         
-        # Step 3
+        # Step 4
         callingPlayer = GameState.requestCallForBluffs(self, action)
         if callingPlayer != None:
             if action in self.influence:
@@ -76,7 +80,7 @@ class Player():
                 message = "Bluffing %s failed for %s" % (action.name, self)
                 return False, message             
         
-        # Step 4
+        # Step 5
         status, response = action.play(action, self, target)
         return status, response
     

@@ -86,21 +86,40 @@ def MainLoop():
             PlayersAlive = [player for player in Players if player.alive]
         
         def ChooseAction():    
-            action = input ("Action > ")
-            if not action.isnumeric():
+            move = input ("Action> ")
+            if not move.isnumeric():
                 ChooseAction()
                 return
-            action = int(action) - 1
+            move = int(move) - 1
             
-            if not (action >= 0 and action < len(AvailableActions)):
+            if not (move >= 0 and move < len(AvailableActions)):
                 ChooseAction()
                 return
             
-            print("Playing %s" % AvailableActions[action].name)
-            status, response = player.play(AvailableActions[action])
+            print("Playing %s" % AvailableActions[move].name)
+            try:
+                status, response = player.play(AvailableActions[move])
+            except action.TargetRequired:
+                def ChooseTarget():
+                    for i, player in enumerate(Players):
+                        print(" %i: %s" % (i + 1, player.name))
+                    target = input ("Choose a target>")
+                    
+                    if not target.isnumeric():
+                        return ChooseTarget()
+                    target = int(target) - 1
+                    if target < 0 or target > len(Players):
+                        return ChooseTarget()
+                    
+                    return target
+                        
+                target = ChooseTarget()
+                status, response = player.play(AvailableActions[move], Players[target])
+                
             if status == False:
                 print (response)
                 ChooseAction()
+            
         
         PrintInfo()
         PrintActions()

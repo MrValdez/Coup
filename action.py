@@ -112,10 +112,10 @@ class Assassin(Action):
     blocks = []
             
     def play(self, player, target = None):
-        if target == None:
-            raise TargetRequired
         if player.coins < 3:
             return False, "Not enough coins"
+        if target == None:
+            raise TargetRequired
             
         player.coins -= 3
         target.loseInfluence()

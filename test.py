@@ -101,7 +101,11 @@ class ActionBlocks(unittest.TestCase):
             
     def test_SelfBlocking(self):
         """ Make sure that player can't block themselves """
-        self.assertRaises("Not yet implemented")
+        player            = ActionBlocks.AlwaysBlockingPlayer()
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)
+        self.assertNotEqual(player.coins, 2)
             
     def test_BlockingAction(self):
         """ Test if players can block """

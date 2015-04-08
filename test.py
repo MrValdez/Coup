@@ -187,14 +187,14 @@ class Actions(unittest.TestCase):
         player              = AmbassadorCheaterTester([action.Contessa, action.Contessa])
         player.influence    = [action.Income, action.ForeignAid]
         GameState.Deck      = [action.Duke, action.Ambassador]
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.InvalidTarget):
             status, response = player.play(action.Ambassador)
         
         # test with player cheating by having just one influence but selecting two
         player              = AmbassadorCheaterTester([action.Duke, action.Ambassador])
         player.influence    = [action.Income]
         GameState.Deck      = [action.Duke, action.Ambassador]
-        with self.assertRaises(BaseException):
+        with self.assertRaises(action.InvalidTarget):
             status, response = player.play(action.Ambassador)
         
 class Players(unittest.TestCase):
@@ -292,7 +292,7 @@ class Players(unittest.TestCase):
         player.loseInfluence()
         self.assertFalse(player.alive)
         self.assertEqual(len(player.influence), 0)
-        with self.assertRaises(BaseException):
+        with self.assertRaises(IndexError):
             player.changeCard(player.influence[0])
 
     def test_ForceCoup(self):

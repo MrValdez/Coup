@@ -1,6 +1,7 @@
 # Coup specific exceptions
 #   TargetRequired
 #   BlockOnly
+#   InvalidTarget
 
 # Actions implemented:
 #   Income
@@ -15,7 +16,12 @@
 from game import GameState
 
 class TargetRequired(Exception):   pass
-class BlockOnly(Exception):   pass
+class BlockOnly(Exception):        pass
+class InvalidTarget(Exception):    
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
 
 class Action:
     name = ""
@@ -144,17 +150,18 @@ class Ambassador(Action):
         def ReturnCards():
             GameState.AddToDeck(deckCards[0])
             GameState.AddToDeck(deckCards[1])
-            raise BaseException     #todo: make Coup-specific exception to select new cards for Ambassador
             
         if len(newInfluence) != influenceRemaining:
             # There is a missing card. Try again.
             ReturnCards()
+            raise InvalidTarget("Wrong number of cards given")
         
         for card in newInfluence:
             if not card in choices:
                 # something is wrong. The player sent a card choice that is not part of the original choices.
                 # try again.
                 ReturnCards()
+                raise InvalidTarget("Card given not part of valid choices")
         
         # give the player their new cards        
         player.influence = list(newInfluence)

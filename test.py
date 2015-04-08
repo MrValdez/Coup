@@ -57,5 +57,11 @@ class Actions(unittest.TestCase):
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
                 
+    def test_ForeignAid(self):
+        player = self.player
+        
+        player.play(action.Duke)
+        self.assertEqual(player.coins, 5)
+                
 if __name__ == "__main__":
     unittest.main()

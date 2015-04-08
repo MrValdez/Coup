@@ -5,10 +5,8 @@
 class Action:
     name = ""
     description = ""
-    
-    def __init__(self):
-        pass
-        
+    blocks = []
+            
     def play(self, player, target = None):
         # should be overrriden by child classes
         pass
@@ -43,3 +41,11 @@ class Coup(Action):
         player.coins -= 1
         target.loseInfluence()
         return True, "Success"
+
+class Duke(Action):
+    name = "Duke"
+    description = "Gain 3 gold. Blocks Foreign Aid."
+    blocks = [ForeignAid]
+            
+    def play(self, player, target = None):
+        player.coins += 3

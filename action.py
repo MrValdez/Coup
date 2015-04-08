@@ -1,6 +1,7 @@
 # Actions available:
 #   Income
 #   ForeignAid
+from game import GameState
 
 class Action:
     name = ""
@@ -10,6 +11,10 @@ class Action:
     def play(self, player, target = None):
         # should be overrriden by child classes
         pass
+        
+    def requestBlocks(self, action):
+        for player in GameState.PlayerList:
+            player.confirmBlock(action)
 
 class Income(Action):
     name = "Income"

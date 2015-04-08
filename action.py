@@ -5,10 +5,10 @@
 #   Duke
 #   Captain
 #   Contessa
+#   Assassin
 
 # to be implemented:
 #   Ambassador
-#   Assassin
 #   Forced Coup
 
 class Action:
@@ -98,4 +98,17 @@ class Contessa(Action):
             
     def play(self, player, target = None):
         raise BaseException     #todo: make Coup-specific exception on Contessa un-usable as an action
+        
+class Assassin(Action):
+    name = "Assassin"
+    description = "Assasinate. Pay 2 coins to kill a player's influence."
+    blocks = []
+            
+    def play(self, player, target = None):
+        if target == None:
+            raise BaseException     #todo: make Coup-specific exception on missing target
+            
+        target.loseInfluence()
+        
+        return True, "Success"
         

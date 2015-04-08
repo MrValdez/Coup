@@ -97,13 +97,24 @@ class Actions(unittest.TestCase):
             
         # using Contessa as a block
         class BlockWithContessa(Player):
-            def confirmBlock(self, action): 
+            def confirmBlock(self, opponentAction): 
                 return action.Contessa
                 
         player2 = BlockWithContessa()
         
         player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 2)
+        
+    def test_Assasin(self):
+        player  = self.player
+        player2 = Player()
+        
+        self.assertEqual(len(player2.influence), 2)
+        player.play(action.Assassin, player2)
+        self.assertEqual(len(player2.influence), 1)
+        player.play(action.Assassin, player2)
+        self.assertEqual(len(player2.influence), 0)
+        self.assertFalse(player2.alive)
         
 
 class Players(unittest.TestCase):
@@ -212,11 +223,11 @@ class BlockingSystem(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, action): 
+        def confirmBlock(self, opponentAction): 
             return self.CardUsedToBlock
 
     class NeverBlockingPlayer(Player):
-        def confirmBlock(self, action): return None
+        def confirmBlock(self, opponentAction): return None
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True
@@ -336,11 +347,11 @@ class ActionBlocking(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, action): 
+        def confirmBlock(self, opponentAction): 
             return self.CardUsedToBlock
 
     class NeverBlockingPlayer(Player):
-        def confirmBlock(self, action): return None
+        def confirmBlock(self, opponentAction): return None
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True
@@ -385,7 +396,7 @@ class CallBluff(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, action): 
+        def confirmBlock(self, opponentAction): 
             return self.CardUsedToBlock
 
     def test_SelfCalling(self):

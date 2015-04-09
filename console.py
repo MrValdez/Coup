@@ -25,8 +25,34 @@ class ConsolePlayer(Player):
             
     def confirmBlock(self, opponentAction):
         """ returns action used by player to blocks action. return None if player allows action. """
-        # todo: raise notImplemented. should be overriden
-        return None
+        cardBlockers = []
+        
+        for card in GameState.CardsAvailable:
+            if opponentAction.name in card.blocks:
+                cardBlockers.append(card)
+
+        print ("%s can be blocked with the following cards:" % (opponentAction.name))
+        for i, card in enumerate(cardBlockers):
+            print("%i: %s" % (i + 1, card.name))
+        print("%i: (Do not block)" % (len(cardBlockers) + 1))
+            
+        choice = input(" Which card should %s use to block? " % (self.name))
+        if not choice.isnumeric():
+            print ("Invalid choice, try again\n")
+            return self.confirmBlock(opponentAction)
+        choice = int(choice) - 1
+        
+        if choice == len(cardBlockers):
+            return None         # player decides not to block
+        
+        if not (choice >= 0 and choice < len(cardBlockers)):
+            print ("Invalid choice, try again\n")
+            return self.confirmBlock(opponentAction)
+            
+        block = cardBlockers[choice - 1]
+        
+        print("%s is blocking with %s" % (self.name, block.name))
+        return block
         
     def selectInfluenceToDie(self):
         """ select an influence to die. returns the value from the influence list. """

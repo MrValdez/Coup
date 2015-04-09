@@ -158,25 +158,38 @@ def MainLoop():
                 return
             
             status = False
-            print("%s is playing %s" % (player.name, AvailableActions[move].name))
             
             def ChooseTarget():
-                for i, player in enumerate(Players):
-                    print(" %i: %s" % (i + 1, player.name))
+                PossibleTargets = list(Players)
+                PossibleTargets.remove(player)          #todo: remove this to test if the program handles targetting self
+                
+                #todo: add code to remove dead players from list.
+                
+                if len(PossibleTargets) == 1:
+                    return PossibleTargets[0]
+                
+                for i, iterPlayer in enumerate(PossibleTargets):
+                    print(" %i: %s" % (i + 1, iterPlayer.name))
                 target = input ("Choose a target>")
                 
                 if not target.isnumeric():
                     return ChooseTarget()
                 target = int(target) - 1
-                if target < 0 or target >= len(Players):
+                if target < 0 or target >= len(PossibleTargets):
                     return ChooseTarget()
                 
-                return Players[target]
+                return PossibleTargets[target]
 
             target = None
             if AvailableActions[move].hasTarget:
                 target = ChooseTarget()
             
+            print("%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
+            if not target is None:
+                print(" (target: %s)" % (target.name))
+            else:
+                print("")
+
             try:
                 status, response = player.play(AvailableActions[move], target)
             except action.ActionNotAllowed as e:

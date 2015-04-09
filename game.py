@@ -18,14 +18,20 @@ class GameState:
         self.randomShuffle = random.shuffle
         self.randomSelector = random.choice
 
-    def requestBlocks(self, activePlayer, action):
+    def requestBlocks(self, activePlayer, action, targetPlayer):
         """ 
         Ask each player if they want to block active player's action.
-        Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206). However,
+        for the sake of game flow, the targetted player (if any) will be requested first.
         If someone wants to block, return the tuple (player, action). Else, return (None, None).
         """
         ActiveIndex = self.PlayerList.index(activePlayer)
         PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
+        
+        if targetPlayer != None:
+            TargetIndex = self.PlayerList.index(targetPlayer)
+            PlayerList.remove(targetPlayer)
+            PlayerList = [self.PlayerList[TargetIndex]] + PlayerList
         
         for player in PlayerList:
             if player == activePlayer or not player.alive: 

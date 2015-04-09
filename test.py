@@ -410,7 +410,7 @@ class Players(unittest.TestCase):
         status, response = player3.play(action.Captain, player1)
         self.assertTrue(status, response)
 
-        self.assertEqual(Order, [4, 5, 6, 1, 2])
+        self.assertEqual(Order, [1, 4, 5, 6, 2])
     
     def test_RequestCallsRotation(self):
         """

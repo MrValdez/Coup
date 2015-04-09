@@ -96,7 +96,7 @@ class Player():
         # iterate each available cards and check if move can be blocked
         for card in GameState.CardsAvailable:
             if action.name in card.blocks:
-                blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
+                blockingPlayer, blockingAction = GameState.requestBlocks(self, action, target)
                 break
         
         if blockingPlayer != None:

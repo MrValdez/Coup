@@ -462,7 +462,20 @@ class BlockingSystem(unittest.TestCase):
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True
-        
+
+    def test_getBlockingActions(self):
+        # Foreign Aid
+        blockers = GameState.getBlockingActions(action.ForeignAid)
+        self.assertIn(action.Duke, blockers)
+
+        # Captain
+        blockers = GameState.getBlockingActions(action.Captain)
+        self.assertIn(action.Captain, blockers)
+        self.assertIn(action.Ambassador, blockers)
+    
+        # Assassin
+        blockers = GameState.getBlockingActions(action.Assassin)
+        self.assertIn(action.Contessa, blockers)
 
     def test_SelfBlocking(self):
         """ Make sure that player can't block themselves """

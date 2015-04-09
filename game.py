@@ -76,4 +76,15 @@ class GameState:
         self.Deck.remove(card)
         return card
 
+    def getBlockingActions(self, action):
+        """
+        returns all the cards the block an action
+        """
+        blockers = []
+        for card in GameState.CardsAvailable:
+            if action.name in card.blocks:
+                blockers.append(card)
+                
+        return blockers
+            
 GameState = GameState()     # global variable

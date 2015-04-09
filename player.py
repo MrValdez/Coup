@@ -93,11 +93,8 @@ class Player():
         blockingPlayer = None
         
         # should only call bluff for cards, not common actions
-        # iterate each available cards and check if move can be blocked
-        for card in GameState.CardsAvailable:
-            if action.name in card.blocks:
-                blockingPlayer, blockingAction = GameState.requestBlocks(self, action, target)
-                break
+        if len(GameState.getBlockingActions(action)):
+            blockingPlayer, blockingAction = GameState.requestBlocks(self, action, target)
         
         if blockingPlayer != None:
             # Step 3.a

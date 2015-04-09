@@ -20,7 +20,7 @@ class GameState:
         If someone wants to block, return the tuple (player, action). Else, return (None, None)
         """
         for player in self.PlayerList:
-            if player == activePlayer: 
+            if player == activePlayer or not player.alive: 
                 continue
             
             blockingAction = player.confirmBlock(action)
@@ -40,8 +40,10 @@ class GameState:
         If someone wants to call, return the player. Else, return None
         """
         for player in self.PlayerList:
-            if player == activePlayer: continue
-            if player.confirmCall(activePlayer, action): return player
+            if player == activePlayer or not player.alive: 
+                continue
+            if player.confirmCall(activePlayer, action): 
+                return player
         return None
 
     def AddToDeck(self, card):

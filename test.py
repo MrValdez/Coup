@@ -442,7 +442,30 @@ class BlockingSystem(unittest.TestCase):
         self.assertEqual(len(player.influence), 1)
         self.assertEqual(len(player_blocker.influence), 2)
         
+    class BlockingPlayerThatLoseGame(Player):
+        """For testing of complex scenario in test_BlockingPlayerBluffIsCalledAndTheyLoseGame()"""
+        def confirmCall(self, activePlayer, action):
+            raise action.DeadPlayer
+            
+        def confirmBlock(self, opponentAction): 
+            return action.Captain
 
+    def test_BlockingPlayerBluffIsCalledAndTheyLoseGame(self):
+        """ 
+        This test the following scenario:
+            1. Active player plays an action
+            2. Another player with one influence left blocks
+            3. Active player calls bluff
+            4. Blocking player loses their last influence
+            5. Blocking player SHOULD NOT get the ability to call active player's action
+        """
+        player                   = BlockingSystem.AlwaysCallingPlayer()
+        player_blocker           = BlockingSystem.BlockingPlayerThatLoseGame()
+        player.influence         = [action.Captain, action.Captain]
+        player_blocker.influence = [action.Duke]
+
+        status, response = player.play(action.Captain, player_blocker)
+        # action.DeadPlayer should never be called. If it does, then step #5 of this scenario happened
     
 class ActionBlocking(unittest.TestCase):
     def setUp(self):

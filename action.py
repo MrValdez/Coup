@@ -35,6 +35,7 @@ class Action:
     name = ""
     description = ""
     blocks = []
+    hasTarget = False
             
     def play(self, player, target = None):
         """
@@ -67,6 +68,7 @@ class ForeignAid(Action):
 class Coup(Action):
     name = "Coup"
     description = "Pay 7 gold to remove target player's influence"
+    hasTarget = True
     
     def play(self, player, target = None):
         # player should have 7 coins. 
@@ -97,6 +99,7 @@ class Captain(Action):
     name = "Captain"
     description = "Steal 2 gold from target. Blocks Steal."
     blocks = ["Captain"]
+    hasTarget = True
             
     def play(self, player, target = None):
         if target == None:
@@ -126,6 +129,7 @@ class Assassin(Action):
     name = "Assassin"
     description = "Assasinate. Pay 3 coins to kill a player's influence."
     blocks = []
+    hasTarget = True
             
     def play(self, player, target = None):
         if player.coins < 3:

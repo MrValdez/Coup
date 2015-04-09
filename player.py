@@ -64,7 +64,15 @@ class Player():
             raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))
         
         # Step 3
-        blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
+        blockingPlayer = None
+        
+        # should only call bluff for cards, not common actions
+        # iterate each available cards and check if move can be blocked
+        for card in GameState.CardsAvailable:
+            if action.name in card.blocks:
+                blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
+                break
+
         
         if blockingPlayer != None:
             # Step 3.a
@@ -81,7 +89,11 @@ class Player():
                 return False, message
         
         # Step 4
-        callingPlayer = GameState.requestCallForBluffs(self, action)
+        
+        callingPlayer = None
+        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
+            callingPlayer = GameState.requestCallForBluffs(self, action)
+            
         if callingPlayer != None:
             # step 4.a
             if action in self.influence:

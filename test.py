@@ -381,7 +381,67 @@ class Players(unittest.TestCase):
         with self.assertRaises(action.DeadPlayer):
             status, response = player.play(action.Income)
         self.assertEqual(player.coins, action.ForceCoupCoins)
-            
+
+    def test_RequestBlocksRotation(self):
+        """
+        This tests that requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        """
+        GameState.reset()
+        GameState.PlayerList = []
+        
+        Order = []
+        
+        class PlayerNumber(Player):  
+            def __init__(self, position, Order):
+                self.position = position
+                self.Order = Order
+                Player.__init__(self)
+            def confirmBlock(self, opponentAction):
+                self.Order.append(self.position)
+                return None
+
+        player1 = PlayerNumber(1, Order)
+        player2 = PlayerNumber(2, Order)
+        player3 = PlayerNumber(3, Order)
+        player4 = PlayerNumber(4, Order)
+        player5 = PlayerNumber(5, Order)
+        player6 = PlayerNumber(6, Order)
+        
+        status, response = player3.play(action.Captain, player1)
+        self.assertTrue(status, response)
+
+        self.assertEqual(Order, [4, 5, 6, 1, 2])
+    
+    def test_RequestCallsRotation(self):
+        """
+        This tests that requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        """
+        GameState.reset()
+        GameState.PlayerList = []
+        
+        Order = []
+        
+        class PlayerNumber(Player):  
+            def __init__(self, position, Order):
+                self.position = position
+                self.Order = Order
+                Player.__init__(self)
+            def confirmCall(self, activePlayer, action): 
+                self.Order.append(self.position)
+                return False
+
+        player1 = PlayerNumber(1, Order)
+        player2 = PlayerNumber(2, Order)
+        player3 = PlayerNumber(3, Order)
+        player4 = PlayerNumber(4, Order)
+        player5 = PlayerNumber(5, Order)
+        player6 = PlayerNumber(6, Order)
+        
+        status, response = player3.play(action.Captain, player1)
+        self.assertTrue(status, response)
+
+        self.assertEqual(Order, [4, 5, 6, 1, 2])
+    
     
 class BlockingSystem(unittest.TestCase):
     def setUp(self):

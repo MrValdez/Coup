@@ -21,9 +21,13 @@ class GameState:
     def requestBlocks(self, activePlayer, action):
         """ 
         Ask each player if they want to block active player's action.
-        If someone wants to block, return the tuple (player, action). Else, return (None, None)
+        Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        If someone wants to block, return the tuple (player, action). Else, return (None, None).
         """
-        for player in self.PlayerList:
+        ActiveIndex = self.PlayerList.index(activePlayer)
+        PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
+        
+        for player in PlayerList:
             if player == activePlayer or not player.alive: 
                 continue
             
@@ -41,9 +45,13 @@ class GameState:
     def requestCallForBluffs(self, activePlayer, action):
         """ 
         Ask each player if they want to call active player's (possible) bluff.
+        Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
         If someone wants to call, return the player. Else, return None
         """
-        for player in self.PlayerList:
+        ActiveIndex = self.PlayerList.index(activePlayer)
+        PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
+
+        for player in PlayerList:
             if player == activePlayer or not player.alive: 
                 continue
             if player.confirmCall(activePlayer, action): 

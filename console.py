@@ -249,24 +249,27 @@ def MainLoop():
             target = None
             if AvailableActions[move].hasTarget:
                 target = ChooseTarget()
-            
-            print("\n%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
-            if not target is None:
-                print(" (target: %s)" % (target.name))
-            else:
-                print("")
 
             try:
                 status, response = player.play(AvailableActions[move], target)
+
+                print("\n%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
+                if not target is None:
+                    print(" (target: %s)" % (target.name))
+                else:
+                    print("")
             except action.ActionNotAllowed as e:
                 print(e.message)
                 ChooseAction()
+                return
             except action.NotEnoughCoins as exc:
                 print(" You need %i coins to play %s. You only have %i coins." % (exc.coinsNeeded, AvailableActions[move].name, player.coins))
                 ChooseAction()
+                return
             except action.BlockOnly:
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()
+                return
             except action.TargetRequired:                        
                 target = ChooseTarget()
                 status, response = player.play(AvailableActions[move], target)

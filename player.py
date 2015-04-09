@@ -75,6 +75,14 @@ class Player():
         if callingPlayer != None:
             # step 4.a
             if action in self.influence:
+                # active player is telling the truth. Return the card back to the deck.
+                index = self.influence.index(action)
+                card = self.influence[index]
+                self.influence.remove(card)
+                GameState.AddToDeck(card)
+                card = GameState.DrawCard()
+                self.influence.append(card)
+                
                 callingPlayer.loseInfluence()
             else:
                 self.loseInfluence()

@@ -461,7 +461,40 @@ class BlockingSystem(unittest.TestCase):
         
         self.assertEqual(len(player.influence), 1)
         self.assertEqual(len(player_blocker.influence), 2)
+
+    def test_ChallengeFailAndPlayerShouldShuffleShownCard(self):
+        """ 
+        Create a scenario where active player plays action, opposing player calls bluff, active player is telling the truth.
+        This will test that the active player's card is revealed, returned to the player deck and a new card is drawn.
+        This will also test if after returning the card, the action still plays
+        """
+        #todo: use a mock object to create a mock action that is blockable
         
+        player            = self.player
+        player.influence  = [action.Income, action.Duke]
+        player_blocker    = BlockingSystem.AlwaysCallingPlayer()
+        
+        def randomShuffle(deck):    pass            # does not shuffle
+        def randomSelector(deck):   return deck[0]  # select the first card in the deck
+        
+        # change the random functions used by the Game State so we can test
+        GameState.randomShuffle  = randomShuffle
+        GameState.randomSelector = randomSelector
+        GameState.Deck = [action.Income]
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.Duke)
+        self.assertTrue(status, response)
+        self.assertEqual(player.coins, 5)
+        
+        # check that the winner of the challenge draw from the deck.
+        self.assertEqual(player.influence[0], action.Income)
+        self.assertEqual(player.influence[1], action.Income)
+        self.assertEqual(GameState.Deck[0], action.Duke)
+        
+        self.assertEqual(len(player.influence), 2)
+        self.assertEqual(len(player_blocker.influence), 1)
+                
     class PlayerCallToLoseAndCannotBlock(Player):
         """For testing of complex scenario in test_BlockingPlayerBluffIsCalledAndTheyLoseGame()"""
         def confirmCall(self, activePlayer, action):

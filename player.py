@@ -100,7 +100,7 @@ class Player():
                 callingPlayer.loseInfluence()
             else:
                 self.loseInfluence()
-                message = "Bluffing %s failed for %s" % (action.name, self)
+                message = "Bluffing %s failed for %s" % (action.name, self.name)
                 return False, message             
         
         # Step 5

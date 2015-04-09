@@ -548,7 +548,7 @@ class CallBluff(unittest.TestCase):
 
         self.assertEqual(len(player.influence), 1)
         self.assertFalse(status, response)                
-        expectedMessage = "Bluffing %s failed for %s" % (playedAction.name, player)
+        expectedMessage = "Bluffing %s failed for %s" % (playedAction.name, player.name)
         self.assertEqual(response, expectedMessage)
 
     def test_CallActivePlayerBluff_Failed(self):

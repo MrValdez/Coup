@@ -60,6 +60,12 @@ class Actions(unittest.TestCase):
         self.assertLess(player.coins, 7)
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
+        
+        # test for coup against dead opponent
+        player2.alive = False
+        player.coins = 7
+        with self.assertRaises(action.DeadPlayer):
+            status, response = player.play(action.Coup, player2)
                 
     def test_Duke(self):
         player = self.player

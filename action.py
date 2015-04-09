@@ -87,7 +87,7 @@ class Coup(Action):
             raise TargetRequired
                         
         if not target.alive:
-            return False, "Invalid target"
+            raise InvalidTarget("Target is dead")
             
         player.coins -= 7
         target.loseInfluence()

@@ -31,7 +31,28 @@ class ConsolePlayer(Player):
     def selectInfluenceToDie(self):
         """ select an influence to die. returns the value from the influence list. """
         # todo: raise notImplemented. should be overriden by the input class
-        return random.choice(self.influence)  # todo: change from random choice to player choice
+        print ("%s has lost the challenge. " % (self.name))
+        
+        if len(self.influence) == 1:
+            print ("%s will lose their last card, %s" % (self.name, self.influence[0].name))
+            return self.influence[0]
+        
+        print ("Select influence to lose:")
+        for i, card in enumerate(self.influence):
+            print ("%i: %s" % (i + 1, card))
+        choice = input("> ")
+        if not choice.isnumeric():
+            print ("Invalid choice, try again\n")
+            return self.selectInfluenceToDie()
+        choice = int(choice)
+        if not (choice == 1 or choice == 2):
+            print ("Invalid choice, try again\n")
+            return self.selectInfluenceToDie()
+        if choice > len(self.influence):
+            print ("Invalid choice, try again\n")
+            return self.selectInfluenceToDie()
+            
+        return self.influence[choice - 1]
 
     def selectAmbassadorInfluence(self, choices, influenceRemaining):
         """ returns one or two cards from the choices. """
@@ -204,7 +225,6 @@ def MainLoop():
                 
             if status == False:
                 print (response)
-                ChooseAction()
             
         if player.alive:
             PrintInfo()

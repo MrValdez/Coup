@@ -259,6 +259,9 @@ def MainLoop():
             except action.ActionNotAllowed as e:
                 print(e.message)
                 ChooseAction()
+            except action.NotEnoughCoins as exc:
+                print(" You need %i coins to play %s. You only have %i coins." % (exc.coinsNeeded, AvailableActions[move].name, player.coins))
+                ChooseAction()
             except action.BlockOnly:
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()

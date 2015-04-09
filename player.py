@@ -72,7 +72,6 @@ class Player():
             if action.name in card.blocks:
                 blockingPlayer, blockingAction = GameState.requestBlocks(self, action)
                 break
-
         
         if blockingPlayer != None:
             # Step 3.a
@@ -111,7 +110,7 @@ class Player():
         loses = self.selectInfluenceToDie()
     
         self.influence.remove(loses)
-        if not len(self.influence):
+        if len(self.influence) == 0:
             self.alive = False            
             
     def confirmCall(self, activePlayer, action): 

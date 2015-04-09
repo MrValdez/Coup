@@ -8,7 +8,7 @@ import os
 DebugMode = True
 DebugMode = False
 
-defaultNames = ["Leonardo", "Michaelengelo", "Raphael", "Donatello", "Splinter", "April"]
+defaultNames = ["Leonardo", "Michelangelo", "Raphael", "Donatello", "Splinter", "April"]
 
 class ConsolePlayer(Player):
     def confirmCall(self, activePlayer, action): 

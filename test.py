@@ -462,6 +462,32 @@ class BlockingSystem(unittest.TestCase):
         self.assertEqual(len(player.influence), 1)
         self.assertEqual(len(player_blocker.influence), 2)
 
+    def test_CallBlockingActionAsBluffWithOneInfluence_Fail(self):
+        """ 
+        Opoosing player blocks action. 
+        Active player, with one influence, calls bluff. 
+        Opposing player is telling the truth. Their card should be shuffled back and active player should loses the game.
+        The action should fail.
+        """
+        #todo: use a mock object to create a mock action that is blockable
+        
+        player            = BlockingSystem.AlwaysCallingPlayer()
+        player.influence  = [action.Duke]
+        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.Duke)
+        player_blocker.influence = [action.Duke, action.Duke]
+        
+        self.assertEqual(len(player.influence), 1)
+        self.assertEqual(len(player_blocker.influence), 2)
+
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)
+        self.assertFalse(status)
+        self.assertEqual(player.coins, 2)
+        
+        self.assertFalse(player.alive)
+        self.assertEqual(len(player.influence), 0)
+        self.assertEqual(len(player_blocker.influence), 2)
+
     def test_ChallengeFailAndPlayerShouldShuffleShownCard(self):
         """ 
         Create a scenario where active player plays action, opposing player calls bluff, active player is telling the truth.

@@ -5,9 +5,6 @@ from game   import GameState
 import random
 import os
 
-DebugMode = False
-DebugMode = True
-
 # Freemode allows the game to allow for any cards to be played
 FreeMode = False
 FreeMode = True
@@ -131,9 +128,26 @@ def PrintTurnOrder():
 def PrintDeckList():
     print ("There are %i cards in the Court Deck" % (len(GameState.Deck)))
     
-    if DebugMode:
-        deck = [card.name for card in GameState.Deck]
+    if FreeMode:
+        # calculate what cards can be in the court deck
+        deck = GameState.CardsAvailable * 3
+        for player in Players:
+            for card in player.influence:
+                try:
+                    deck.remove(card)
+                except ValueError:
+                    # one of the players received more than 3 copies of a card.
+                    # add a "fake card" into the deck as indicator
+                    class FakeCard(action.Action):  pass
+                    FakeCard.name = "%s (Extra)" % (card.name)
+                    deck.append(FakeCard)
+        for card in GameState.RevealedCards:
+            deck.remove(card)
+            
+        deck = [card.name for card in deck]
         deck.sort()
+        
+        print("Theoritical cards are:")
         for card in deck:
             print(" ", card)
 

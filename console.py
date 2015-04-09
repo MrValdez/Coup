@@ -59,7 +59,7 @@ class ConsolePlayer(Player):
     def selectInfluenceToDie(self):
         """ select an influence to die. returns the value from the influence list. """
         # todo: raise notImplemented. should be overriden by the input class
-        print ("\n%s has lost the challenge!" % (self.name))
+        print ("\n%s has lost an influence!" % (self.name))
         
         if len(self.influence) == 1:
             print ("%s will lose their last card, %s" % (self.name, self.influence[0].name))
@@ -149,7 +149,8 @@ def Setup():
     def CreatePlayer(Number):
         player = ConsolePlayer()
         
-        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number))
+        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number + 1))
+        player.coins = 11
         
         if player.name.strip() == "":
             player.name = random.choice(defaultNames)
@@ -242,7 +243,7 @@ def MainLoop():
                 PossibleTargets = list(Players)
                 PossibleTargets.remove(player)          #todo: remove this to test if the program handles targetting self
                 
-                #todo: add code to remove dead players from list.
+                PossibleTargets = [player for player in PossibleTargets if player.alive]
                 
                 if len(PossibleTargets) == 1:
                     return PossibleTargets[0]
@@ -259,6 +260,11 @@ def MainLoop():
                 
                 return PossibleTargets[target]
 
+            if player.coins >= action.ForceCoupCoins and AvailableActions[move].name != "Coup":
+                print("Player has %i coins. Forced Coup is the only allowed action" % (player.coins))
+                ChooseAction()
+                return            
+            
             target = None
             if AvailableActions[move].hasTarget:
                 target = ChooseTarget()
@@ -294,8 +300,8 @@ def MainLoop():
             PrintInfo()
             PrintActions()
             ChooseAction()
+            input("\nPress enter key to continue...")
         Cleanup()
-        input("\nPress enter key to continue...")
         
     print("\nThe winner is %s" % (PlayersAlive[0].name))
 

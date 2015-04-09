@@ -1,3 +1,6 @@
+#todo: blocks
+#      bluffs
+
 import action
 from player import Player
 from game   import GameState
@@ -6,7 +9,32 @@ import random
 import os
 
 class ConsolePlayer(Player):
+    def confirmCall(self, activePlayer, action): 
+        """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
+        choice = input ("%s: Do you think %s's %s is a bluff? Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
+        choice = choice.upper()
+        
+        if not choice in ('Y', 'N'):
+            print (" Type Y or N.")
+            return self.confirmCall(activePlayer, action)
+            
+        if choice == 'Y':
+            return True
+        
+        return False
+            
+    def confirmBlock(self, opponentAction):
+        """ returns action used by player to blocks action. return None if player allows action. """
+        # todo: raise notImplemented. should be overriden
+        return None
+        
+    def selectInfluenceToDie(self):
+        """ select an influence to die. returns the value from the influence list. """
+        # todo: raise notImplemented. should be overriden by the input class
+        return random.choice(self.influence)  # todo: change from random choice to player choice
+
     def selectAmbassadorInfluence(self, choices, influenceRemaining):
+        """ returns one or two cards from the choices. """
         finalChoices = []
         
         def askChoice(choices):
@@ -34,7 +62,6 @@ class ConsolePlayer(Player):
             card2 = askChoice(choices)
             return [card1, card2]
         
-
 Players = []
 PlayersAlive = []
 CurrentPlayer = 0
@@ -131,31 +158,36 @@ def MainLoop():
                 return
             
             status = False
-            print("Playing %s" % AvailableActions[move].name)
+            print("%s is playing %s" % (player.name, AvailableActions[move].name))
+            
+            def ChooseTarget():
+                for i, player in enumerate(Players):
+                    print(" %i: %s" % (i + 1, player.name))
+                target = input ("Choose a target>")
+                
+                if not target.isnumeric():
+                    return ChooseTarget()
+                target = int(target) - 1
+                if target < 0 or target >= len(Players):
+                    return ChooseTarget()
+                
+                return Players[target]
+
+            target = None
+            if AvailableActions[move].hasTarget:
+                target = ChooseTarget()
+            
             try:
-                status, response = player.play(AvailableActions[move])
+                status, response = player.play(AvailableActions[move], target)
             except action.ActionNotAllowed as e:
                 print(e.message)
                 ChooseAction()
             except action.BlockOnly:
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()
-            except action.TargetRequired:
-                def ChooseTarget():
-                    for i, player in enumerate(Players):
-                        print(" %i: %s" % (i + 1, player.name))
-                    target = input ("Choose a target>")
-                    
-                    if not target.isnumeric():
-                        return ChooseTarget()
-                    target = int(target) - 1
-                    if target < 0 or target >= len(Players):
-                        return ChooseTarget()
-                    
-                    return target
-                        
+            except action.TargetRequired:                        
                 target = ChooseTarget()
-                status, response = player.play(AvailableActions[move], Players[target])
+                status, response = player.play(AvailableActions[move], target)
                 
             if status == False:
                 print (response)

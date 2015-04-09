@@ -164,6 +164,7 @@ class Actions(unittest.TestCase):
         GameState.Deck      = [action.Duke, action.Ambassador]
         
         status, response    = player.play(action.Ambassador)
+        self.assertTrue(status, response)
         
         self.assertIn(action.Duke,       player.influence)
         self.assertIn(action.ForeignAid, player.influence)
@@ -181,11 +182,13 @@ class Actions(unittest.TestCase):
         self.assertIn(action.Ambassador, GameState.Deck)
 
         # test duplicates
-        player = Player()
+        player              = AmbassadorTester([action.Ambassador])
         player.influence    = [action.Ambassador]
         GameState.Deck      = [action.Ambassador, action.Ambassador]
         status, response    = player.play(action.Ambassador)
         
+        self.assertEqual(len(player.influence), 1)
+        self.assertEqual(len(GameState.Deck), 2)
         self.assertEqual(player.influence[0], action.Ambassador)
         self.assertEqual(GameState.Deck[0], action.Ambassador)
         self.assertEqual(GameState.Deck[1], action.Ambassador)
@@ -211,6 +214,44 @@ class Actions(unittest.TestCase):
         GameState.Deck      = [action.Duke, action.Ambassador]
         with self.assertRaises(action.InvalidTarget):
             status, response = player.play(action.Ambassador)
+
+    def test_Ambassador_ComplexScenario(self):
+        # test where active player uses Ambassador, called by opponent, shows Ambassador,
+        # removes one influence by the opponent, active player's Ambassador card is shuffled
+        # into the deck, and the Ambassador action still passes
+        class AmbassadorComplexTester(Player):
+            def selectAmbassadorInfluence(self, choices, influenceRemaining):
+                return [action.Duke, action.Duke]
+
+        class AlwaysCallingPlayer(Player):
+            def confirmCall(self, activePlayer, action): return True
+                
+        player              = AmbassadorComplexTester()
+        player.influence    = [action.Ambassador, action.Duke]
+        
+        player2             = AlwaysCallingPlayer()
+        player2.influence   = [action.Ambassador, action.Duke]      
+        
+        GameState.Deck      = [action.Duke, action.Assassin]
+        
+        def randomShuffle(deck):    pass            # does not shuffle
+        def randomSelector(deck):   return deck[0]  # select the first card in the deck
+        
+        # change the random functions used by the Game State so we can test
+        GameState.randomShuffle  = randomShuffle
+        GameState.randomSelector = randomSelector
+
+        status, response = player.play(action.Ambassador)
+        self.assertTrue(status, response)
+
+        self.assertEqual(len(player.influence), 2)
+        self.assertEqual(len(player2.influence), 1)
+        
+        self.assertEqual(player.influence[0], action.Duke)
+        self.assertEqual(player.influence[1], action.Duke)
+        self.assertEqual(GameState.Deck[0], action.Assassin)
+        self.assertEqual(GameState.Deck[1], action.Ambassador)
+           
         
 class Players(unittest.TestCase):
     def setUp(self):
@@ -250,7 +291,7 @@ class Players(unittest.TestCase):
         """ 
         Tests related to the court deck found in GameState class.
             Card Drawing 
-            Drawing card from an empty deck (should return False)
+            Drawing card from an empty deck (should raise MajorError)
             Returning card to deck
         """
         GameState.Deck = [action.Income]
@@ -259,8 +300,8 @@ class Players(unittest.TestCase):
         self.assertEqual(len(GameState.Deck), 0)
         self.assertEqual(action.Income, card)
 
-        card = GameState.DrawCard()        
-        self.assertFalse(card)
+        with self.assertRaises(action.MajorError):
+            card = GameState.DrawCard()
 
         GameState.AddToDeck(action.ForeignAid)
         

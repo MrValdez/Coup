@@ -56,7 +56,7 @@ class GameState:
         self.randomShuffle(self.Deck)
     
     def DrawCard(self):
-        if not len(self.Deck): return False
+        if not len(self.Deck): raise action.MajorError("There is no card in the court deck!")
         
         card = self.randomSelector(self.Deck)
         self.Deck.remove(card)

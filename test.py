@@ -321,17 +321,25 @@ class Players(unittest.TestCase):
 
     def test_ForceCoup(self):
         player = self.player
-        player.coins = 12
         
+        # test that player can't play any actions other than coup when holding more than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins
         with self.assertRaises(action.ActionNotAllowed):
             status, response = player.play(action.Income)
-        self.assertEqual(player.coins, 12)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
 
-        player.coins = 12
+        # test that player can play any actions other than coup when holding less than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins - 1
+        status, response = player.play(action.Income)
+        self.assertTrue(status, response)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
+        
+        # test that dead players can't play any actions other than coup when holding more than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins
         player.alive = False
         with self.assertRaises(action.DeadPlayer):
             status, response = player.play(action.Income)
-        self.assertEqual(player.coins, 12)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
             
     
 class BlockingSystem(unittest.TestCase):

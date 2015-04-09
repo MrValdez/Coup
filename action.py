@@ -16,6 +16,9 @@
 #   Assassin
 #   Ambassador
 
+# Hardcoded value
+#   ForceCoupCoins
+
 from game import GameState
 
 class TargetRequired(Exception):   pass
@@ -37,6 +40,8 @@ class ActionNotAllowed(Exception):
         self.message = message
     def __str__(self):
         return self.message
+
+ForceCoupCoins = 10
 
 class Action:
     name = ""

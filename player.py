@@ -1,4 +1,4 @@
-from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins
+from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins, ForceCoupCoins
 from game import GameState
 import random
 
@@ -63,8 +63,8 @@ class Player():
         if self.coins < action.coinsNeeded:
             raise NotEnoughCoins(action.coinsNeeded)
         
-        if self.coins >= 12 and action != Coup:
-            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))
+        if self.coins >= ForceCoupCoins and action != Coup:
+            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only allowed action" % (self.coins))
         
         # Step 3
         callingPlayer = None

@@ -1,12 +1,11 @@
-#todo: blocks
-#      bluffs
-
 import action
 from player import Player
 from game   import GameState
 
 import random
 import os
+
+defaultNames = ["Leonardo", "Michaelengelo", "Raphael", "Donatello", "Splinter", "April"]
 
 class ConsolePlayer(Player):
     def confirmCall(self, activePlayer, action): 
@@ -127,18 +126,31 @@ def Setup():
     # Shuffle the player list
 
     GameState.reset()
-    #PlayerCount = int(input("How many players? "))
-    PlayerCount = 2
+    
+    def GetNumberOfPlayers():
+        PlayerCount = input("How many players? ")
+        if not PlayerCount.isnumeric():
+            return GetNumberOfPlayers()
+        
+        PlayerCount = int(PlayerCount)
+        if PlayerCount < 2 or PlayerCount > 6:
+            return GetNumberOfPlayers()
+            
+        return PlayerCount
+        
+    PlayerCount = GetNumberOfPlayers()
+    #PlayerCount = 2        # for testing purposes
 
     def CreatePlayer(Number):
         player = ConsolePlayer()
         
-        print("Creating Player #%i" % (Number + 1))
-        #player.name = input(" What is your name? ")
-        player.name = random.choice(["A", "B", "C"]) + str(Number)
+        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number))
         
-        player.loseInfluence()
-        
+        if player.name.strip() == "":
+            player.name = random.choice(defaultNames)
+            defaultNames.remove(player.name)
+            print(" Player %i's name is %s" % (Number + 1, player.name))
+                
         return player
 
     for i in range(PlayerCount):
@@ -152,7 +164,7 @@ def Setup():
     SetupActions()
 
 def PrintTurnOrder():
-    print ("Turn order:")
+    print ("\nTurn order:")
     for i, player in enumerate(Players):
         print(" %i: %s" % (i + 1, player.name))
 

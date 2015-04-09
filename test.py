@@ -483,7 +483,7 @@ class ActionBlocking(unittest.TestCase):
         
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.Captain, player_blocker)
-        self.assertFalse(status, response)                
+        self.assertFalse(status, response)
         self.assertEqual(player.coins, 2)
         
     # todo: add tests for all cards
@@ -520,6 +520,18 @@ class CallBluff(unittest.TestCase):
         self.assertEqual(player.coins, 2)
         status, response = player.play(GenericCardThatCanBlockItself)
         self.assertEqual(player.coins, 3)
+
+    def test_CallCommonAction(self):
+        """ Test to make sure that players shouldn't be able to call common actions as bluffs"""
+        player = self.player
+        player.giveCards(action.ForeignAid)      #todo: add mock object for action
+        
+        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        
+        playedAction = action.Income
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(playedAction)
+        self.assertEqual(player.coins, 3)
     
     def test_CallActivePlayerBluff_Success(self):
         """ Test if other players can call active player's bluff """
@@ -529,9 +541,9 @@ class CallBluff(unittest.TestCase):
         
         player_CallBluff = CallBluff.AlwaysCallingPlayer()
         
-        playedAction = action.ForeignAid
+        playedAction = action.Captain
         self.assertEqual(player.coins, 2)
-        status, response = player.play(playedAction)
+        status, response = player.play(playedAction, player_CallBluff)
         self.assertEqual(player.coins, 2)
 
         self.assertEqual(len(player.influence), 1)

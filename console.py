@@ -5,10 +5,20 @@ from game   import GameState
 import random
 import os
 
-DebugMode = True
 DebugMode = False
+DebugMode = True
+
+# Freemode allows the game to allow for any cards to be played
+FreeMode = False
+FreeMode = True
 
 defaultNames = ["Leonardo", "Michelangelo", "Raphael", "Donatello", "Splinter", "April"]
+
+Players = []
+PlayersAlive = []
+CurrentPlayer = 0
+
+AvailableActions = []
 
 class ConsolePlayer(Player):
     def confirmCall(self, activePlayer, action): 
@@ -112,64 +122,7 @@ class ConsolePlayer(Player):
             print("")
             card2 = askChoice(choices, "Select the second card to take>")
             return [card1, card2]
-        
-Players = []
-PlayersAlive = []
-CurrentPlayer = 0
-
-AvailableActions = []
-def SetupActions():
-    global AvailableActions
-    for action in GameState.CommonActions:
-        AvailableActions.append(action)
-    for action in GameState.CardsAvailable:
-        AvailableActions.append(action)
-
-def Setup():
-    # How many people are playing?
-    # Generate the player list
-    # Shuffle the player list
-
-    GameState.reset()
     
-    def GetNumberOfPlayers():
-        PlayerCount = input("How many players (2-6)? ")
-        if not PlayerCount.isnumeric():
-            return GetNumberOfPlayers()
-        
-        PlayerCount = int(PlayerCount)
-        if PlayerCount < 2 or PlayerCount > 6:
-            return GetNumberOfPlayers()
-            
-        return PlayerCount
-        
-    PlayerCount = GetNumberOfPlayers()
-    #PlayerCount = 2        # for testing purposes
-
-    def CreatePlayer(Number):
-        player = ConsolePlayer()
-        
-        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number + 1))
-        player.coins = 11
-        
-        if player.name.strip() == "":
-            player.name = random.choice(defaultNames)
-            defaultNames.remove(player.name)
-            print(" Player %i's name is %s\n" % (Number + 1, player.name))
-                
-        return player
-
-    print("\n")
-    for i in range(PlayerCount):
-        Players.append(CreatePlayer(i))
-        
-    random.shuffle(Players)
-
-    global PlayersAlive
-    PlayersAlive = [player for player in Players if player.alive]
-    
-    SetupActions()
-
 def PrintTurnOrder():
     print ("\nTurn order:")
     for i, player in enumerate(Players):
@@ -196,6 +149,105 @@ def PrintRevealedCards():
     for card in reveals:
         print(" ", card)
 
+def PrintActions():
+    for i, action in enumerate(AvailableActions):
+        print (" %i: %s" % (i + 1, action.name))
+
+def SelectCards(message, twoCards):
+    print(message)
+    for i, card in enumerate(GameState.CardsAvailable):
+        print("%i: %s" % (i + 1, card.name))
+    
+    def InputCard(message):
+        card = input(message)
+        if not card.isnumeric():
+            return InputCard(message)
+        card = int(card) - 1
+        
+        if not (card >= 0 and card < len(GameState.CardsAvailable)):
+            return InputCard(message)
+            
+        return GameState.CardsAvailable[card]
+    
+    card1 = InputCard("Card #1: ")
+    
+    if not twoCards:
+        return [card1]
+    else:
+        card2 = InputCard("Card #2: ")
+        return [card1, card2]
+        
+def SetupActions():
+    global AvailableActions
+    for action in GameState.CommonActions:
+        AvailableActions.append(action)
+    for action in GameState.CardsAvailable:
+        AvailableActions.append(action)
+
+def SetupRNG():
+    """ This setups the RNG to have the cards come from the user instead """
+    if not FreeMode:
+        return
+    
+    def randomShuffle(deck):    pass            # does not shuffle
+    def randomSelector(deck):    
+        message = "Select the card the player received: "
+        cards = SelectCards(message, False)
+        return cards[0]
+    
+    GameState.randomShuffle  = randomShuffle
+    GameState.randomSelector = randomSelector
+    
+
+def Setup():
+    # How many people are playing?
+    # Generate the player list
+    # Shuffle the player list
+    GameState.reset()
+    SetupActions()
+    
+    def GetNumberOfPlayers():
+        PlayerCount = input("How many players (2-6)? ")
+        if not PlayerCount.isnumeric():
+            return GetNumberOfPlayers()
+        
+        PlayerCount = int(PlayerCount)
+        if PlayerCount < 2 or PlayerCount > 6:
+            return GetNumberOfPlayers()
+            
+        return PlayerCount
+        
+    PlayerCount = GetNumberOfPlayers()
+    #PlayerCount = 2        # for testing purposes
+    
+    def CreatePlayer(Number):
+        player = ConsolePlayer()
+        
+        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number + 1))
+                
+        if player.name.strip() == "":
+            player.name = random.choice(defaultNames)
+            defaultNames.remove(player.name)
+            print(" Player %i's name is %s\n" % (Number + 1, player.name))
+            
+        if FreeMode:                
+            message = "Select %s's cards" % (player.name)
+            player.influence = SelectCards(message, True)
+            
+            print(" Player %s is holding: %s and %s\n" % (player.name, player.influence[0].name, player.influence[1].name))
+                
+        return player
+
+    print("\n")
+    for i in range(PlayerCount):
+        Players.append(CreatePlayer(i))
+        
+    SetupRNG()
+    random.shuffle(Players)
+
+    global PlayersAlive
+    PlayersAlive = [player for player in Players if player.alive]
+    
 def MainLoop():
     # Infinite loop until one player remains
     global PlayersAlive, CurrentPlayer
@@ -212,11 +264,6 @@ def MainLoop():
             print("\n%s's cards are: " % (player.name), end = "")
             print(" and ".join([card.name for card in player.influence]))
             print()
-
-        def PrintActions():
-            print("Available actions:")
-            for i, action in enumerate(AvailableActions):
-                print (" %i: %s" % (i + 1, action.name))
         
         def Cleanup():
             global CurrentPlayer
@@ -298,6 +345,7 @@ def MainLoop():
             
         if player.alive:
             PrintInfo()
+            print("Available actions:")
             PrintActions()
             ChooseAction()
             input("\nPress enter key to continue...")
@@ -305,8 +353,12 @@ def MainLoop():
         
     print("\nThe winner is %s" % (PlayersAlive[0].name))
 
-os.system("cls")
-Setup()
-PrintTurnOrder()
-input("\nPress enter key to start...")
-MainLoop()
+def main():
+    os.system("cls")
+    Setup()
+    PrintTurnOrder()
+    input("\nPress enter key to start...")
+    MainLoop()
+    
+if __name__ == "__main__":
+    main()

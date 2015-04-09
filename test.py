@@ -112,6 +112,7 @@ class Actions(unittest.TestCase):
                 
         player2 = BlockWithContessa()
         
+        player.coins = 3
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 2)
         

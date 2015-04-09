@@ -43,6 +43,7 @@ class Action:
     description = ""
     blocks = []
     hasTarget = False
+    coinsNeeded = 0
             
     def play(self, player, target = None):
         """
@@ -76,11 +77,11 @@ class Coup(Action):
     name = "Coup"
     description = "Pay 7 gold to remove target player's influence"
     hasTarget = True
+    coinsNeeded = 7
     
     def play(self, player, target = None):
-        # player should have 7 coins. 
-        if player.coins < 7:
-            raise NotEnoughCoins(7)
+        if player.coins < self.coinsNeeded:
+            raise NotEnoughCoins(self.coinsNeeded)
             
         # target should be alive
         if target == None:
@@ -137,10 +138,11 @@ class Assassin(Action):
     description = "Assasinate. Pay 3 coins to kill a player's influence."
     blocks = []
     hasTarget = True
-            
+    coinsNeeded = 3
+    
     def play(self, player, target = None):
-        if player.coins < 3:
-            raise NotEnoughCoins(3)
+        if player.coins < self.coinsNeeded:
+            raise NotEnoughCoins(self.coinsNeeded)
         if target == None:
             raise TargetRequired
             

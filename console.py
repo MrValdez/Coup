@@ -13,7 +13,7 @@ defaultNames = ["Leonardo", "Michaelengelo", "Raphael", "Donatello", "Splinter",
 class ConsolePlayer(Player):
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
-        choice = input ("%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
+        choice = input ("\n%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
         choice = choice.upper()
         
         if not choice in ('Y', 'N'):
@@ -33,14 +33,14 @@ class ConsolePlayer(Player):
             if opponentAction.name in card.blocks:
                 cardBlockers.append(card)
 
-        print ("%s can be blocked with the following cards:" % (opponentAction.name))
+        print ("\n%s can be blocked with the following cards:" % (opponentAction.name))
         for i, card in enumerate(cardBlockers):
-            print("%i: %s" % (i + 1, card.name))
-        print("%i: (Do not block)" % (len(cardBlockers) + 1))
+            print(" %i: %s" % (i + 1, card.name))
+        print(" %i: (Do not block)" % (len(cardBlockers) + 1))
             
-        choice = input(" Which card should %s use to block? " % (self.name))
+        choice = input("%s, do you wish to block %s? " % (self.name, opponentAction.name))
         if not choice.isnumeric():
-            print ("Invalid choice, try again\n")
+            print (" Invalid choice, try again\n")
             return self.confirmBlock(opponentAction)
         choice = int(choice) - 1
         
@@ -48,26 +48,26 @@ class ConsolePlayer(Player):
             return None         # player decides not to block
         
         if not (choice >= 0 and choice < len(cardBlockers)):
-            print ("Invalid choice, try again\n")
+            print (" Invalid choice, try again\n")
             return self.confirmBlock(opponentAction)
             
         block = cardBlockers[choice - 1]
         
-        print("%s is blocking with %s" % (self.name, block.name))
+        print("\n%s is blocking with %s\n" % (self.name, block.name))
         return block
         
     def selectInfluenceToDie(self):
         """ select an influence to die. returns the value from the influence list. """
         # todo: raise notImplemented. should be overriden by the input class
-        print ("%s has lost the challenge. " % (self.name))
+        print ("\n%s has lost the challenge!" % (self.name))
         
         if len(self.influence) == 1:
             print ("%s will lose their last card, %s" % (self.name, self.influence[0].name))
             return self.influence[0]
         
-        print ("Select influence to lose:")
+        print ("%s, select influence to lose:" % (self.name))
         for i, card in enumerate(self.influence):
-            print ("%i: %s" % (i + 1, card))
+            print (" %i: %s" % (i + 1, card.name))
         choice = input("> ")
         if not choice.isnumeric():
             print ("Invalid choice, try again\n")
@@ -86,10 +86,10 @@ class ConsolePlayer(Player):
         """ returns one or two cards from the choices. """
         finalChoices = []
         
-        def askChoice(choices):
+        def askChoice(choices, inputMessage):
             for i, choice in enumerate(choices):
-                print ("%i: %s" % (i + 1, choice.name))
-            card = input ("Select a card> ")
+                print (" %i: %s" % (i + 1, choice.name))
+            card = input (inputMessage)
             
             if not card.isnumeric():
                 return askChoice(choices)
@@ -99,16 +99,18 @@ class ConsolePlayer(Player):
                 return askChoice(choices)
             
             card = choices[card]
-            print ("Selected %s" % (card.name))
             return card
-            
-        card1 = askChoice(choices)
+        
+        print("\n%s, these are the cards you drew:" % (self.name))
+        
+        card1 = askChoice(choices, "Select the first card to take>")
         choices.remove(card1)
         
         if (influenceRemaining == 1):
             return [card1]
         else:
-            card2 = askChoice(choices)
+            print("")
+            card2 = askChoice(choices, "Select the second card to take>")
             return [card1, card2]
         
 Players = []
@@ -248,7 +250,7 @@ def MainLoop():
             if AvailableActions[move].hasTarget:
                 target = ChooseTarget()
             
-            print("%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
+            print("\n%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
             if not target is None:
                 print(" (target: %s)" % (target.name))
             else:

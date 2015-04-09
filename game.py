@@ -13,6 +13,8 @@ class GameState:
         self.CardsAvailable = [action.Duke, action.Captain, action.Contessa, action.Assassin, action.Ambassador]
         self.Deck = self.CardsAvailable * 3
         random.shuffle(self.Deck)
+        
+        self.RevealedCards = []
 
     def requestBlocks(self, activePlayer, action):
         """ 

@@ -115,6 +115,8 @@ class Player():
         self.influence.remove(loses)
         if len(self.influence) == 0:
             self.alive = False            
+        
+        GameState.RevealedCards.append(loses)
             
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """

@@ -5,6 +5,7 @@
 #   DeadPlayer
 #   InvalidTarget
 #   ActionNotAllowed
+#   MajorError
 
 # Actions implemented:
 #   Income
@@ -16,11 +17,14 @@
 #   Assassin
 #   Ambassador
 
+# Hardcoded value
+#   ForceCoupCoins
+
 from game import GameState
 
 class TargetRequired(Exception):   pass
 class BlockOnly(Exception):        pass
-class DeadPlayer(Exception):        pass
+class DeadPlayer(Exception):       pass
 
 class NotEnoughCoins(Exception):
     def __init__(self, coinsNeeded):
@@ -37,6 +41,14 @@ class ActionNotAllowed(Exception):
         self.message = message
     def __str__(self):
         return self.message
+
+class MajorError(Exception):
+    def __init__(self, message):
+        self.message = message
+    def __str__(self):
+        return self.message
+
+ForceCoupCoins = 10
 
 class Action:
     name = ""
@@ -176,13 +188,16 @@ class Ambassador(Action):
             # There is a missing card. Try again.
             ReturnCards()
             raise InvalidTarget("Wrong number of cards given")
-        
+
+        choicesCopy = list(choices) # this allow us to test for card duplicates
         for card in newInfluence:
-            if not card in choices:
+            if not card in choicesCopy:
                 # something is wrong. The player sent a card choice that is not part of the original choices.
                 # try again.
                 ReturnCards()
                 raise InvalidTarget("Card given not part of valid choices")
+            
+            choicesCopy.remove(card)
         
         # give the player their new cards        
         player.influence = list(newInfluence)
@@ -190,8 +205,7 @@ class Ambassador(Action):
         # return the unselected cards back to the Court Deck.
         for card in newInfluence:
             choices.remove(card)
-               
+            
         for card in choices:
             GameState.AddToDeck(card)
-        
         return True, "Success"

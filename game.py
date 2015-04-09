@@ -3,9 +3,6 @@ import random
 import action
 
 class GameState:
-#    def __init__(self):
-#        self.reset()
-        
     def reset(self):
         self.PlayerList = []
         
@@ -13,6 +10,13 @@ class GameState:
         self.CardsAvailable = [action.Duke, action.Captain, action.Contessa, action.Assassin, action.Ambassador]
         self.Deck = self.CardsAvailable * 3
         random.shuffle(self.Deck)
+        
+        self.RevealedCards = []
+        
+        # separating these function allow outside modules (like the unit test) to change the behavior of
+        # shuffling and selecting a card
+        self.randomShuffle = random.shuffle
+        self.randomSelector = random.choice
 
     def requestBlocks(self, activePlayer, action):
         """ 
@@ -49,12 +53,12 @@ class GameState:
     def AddToDeck(self, card):
         # todo: add error handling
         self.Deck.append(card)
-        random.shuffle(self.Deck)
+        self.randomShuffle(self.Deck)
     
     def DrawCard(self):
-        if not len(self.Deck): return False
+        if not len(self.Deck): raise action.MajorError("There is no card in the court deck!")
         
-        card = random.choice(self.Deck)
+        card = self.randomSelector(self.Deck)
         self.Deck.remove(card)
         return card
 

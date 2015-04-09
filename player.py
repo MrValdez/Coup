@@ -1,4 +1,4 @@
-from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins
+from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins, ForceCoupCoins
 from game import GameState
 import random
 
@@ -45,10 +45,10 @@ class Player():
         """
         1. Check if player is alive. If not, throw exception.
         2. Check if player has at least 12 coins. If they do, throw exception unless coup is played.
-        3. Check if a player wants to block
-           a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
-        4. Check if any player wants to call bluff from active player
+        3. Check if any player wants to call bluff from active player
            a. If someone wants to call bluff, do Call step
+        4. Check if a player wants to block
+           a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
         5. Play action if successful
         Call step: If someone call the bluff, reveal card. 
                    If card is the action played, remove influence from player.
@@ -63,10 +63,33 @@ class Player():
         if self.coins < action.coinsNeeded:
             raise NotEnoughCoins(action.coinsNeeded)
         
-        if self.coins >= 12 and action != Coup:
-            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))
+        if self.coins >= ForceCoupCoins and action != Coup:
+            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only allowed action" % (self.coins))
         
         # Step 3
+        callingPlayer = None
+        
+        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
+            callingPlayer = GameState.requestCallForBluffs(self, action)
+            
+        if callingPlayer != None:
+            # step 4.a
+            if action in self.influence:
+                # active player is telling the truth. Return the card back to the deck.
+                index = self.influence.index(action)
+                card = self.influence[index]
+                self.influence.remove(card)
+                GameState.AddToDeck(card)
+                card = GameState.DrawCard()
+                self.influence.append(card)
+                
+                callingPlayer.loseInfluence()
+            else:
+                self.loseInfluence()
+                message = "Bluffing %s failed for %s" % (action.name, self.name)
+                return False, message             
+        
+        # Step 4
         blockingPlayer = None
         
         # should only call bluff for cards, not common actions
@@ -89,22 +112,7 @@ class Player():
             else:
                 message = "Blocked by %s" % blockingPlayer.name
                 return False, message
-        
-        # Step 4
-        
-        callingPlayer = None
-        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
-            callingPlayer = GameState.requestCallForBluffs(self, action)
-            
-        if callingPlayer != None:
-            # step 4.a
-            if action in self.influence:
-                callingPlayer.loseInfluence()
-            else:
-                self.loseInfluence()
-                message = "Bluffing %s failed for %s" % (action.name, self.name)
-                return False, message             
-        
+                
         # Step 5
         status, response = action.play(action, self, target)
         return status, response
@@ -115,6 +123,8 @@ class Player():
         self.influence.remove(loses)
         if len(self.influence) == 0:
             self.alive = False            
+        
+        GameState.RevealedCards.append(loses)
             
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """

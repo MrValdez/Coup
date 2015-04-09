@@ -164,6 +164,7 @@ class Actions(unittest.TestCase):
         GameState.Deck      = [action.Duke, action.Ambassador]
         
         status, response    = player.play(action.Ambassador)
+        self.assertTrue(status, response)
         
         self.assertIn(action.Duke,       player.influence)
         self.assertIn(action.ForeignAid, player.influence)
@@ -181,11 +182,13 @@ class Actions(unittest.TestCase):
         self.assertIn(action.Ambassador, GameState.Deck)
 
         # test duplicates
-        player = Player()
+        player              = AmbassadorTester([action.Ambassador])
         player.influence    = [action.Ambassador]
         GameState.Deck      = [action.Ambassador, action.Ambassador]
         status, response    = player.play(action.Ambassador)
         
+        self.assertEqual(len(player.influence), 1)
+        self.assertEqual(len(GameState.Deck), 2)
         self.assertEqual(player.influence[0], action.Ambassador)
         self.assertEqual(GameState.Deck[0], action.Ambassador)
         self.assertEqual(GameState.Deck[1], action.Ambassador)
@@ -211,6 +214,44 @@ class Actions(unittest.TestCase):
         GameState.Deck      = [action.Duke, action.Ambassador]
         with self.assertRaises(action.InvalidTarget):
             status, response = player.play(action.Ambassador)
+
+    def test_Ambassador_ComplexScenario(self):
+        # test where active player uses Ambassador, called by opponent, shows Ambassador,
+        # removes one influence by the opponent, active player's Ambassador card is shuffled
+        # into the deck, and the Ambassador action still passes
+        class AmbassadorComplexTester(Player):
+            def selectAmbassadorInfluence(self, choices, influenceRemaining):
+                return [action.Duke, action.Duke]
+
+        class AlwaysCallingPlayer(Player):
+            def confirmCall(self, activePlayer, action): return True
+                
+        player              = AmbassadorComplexTester()
+        player.influence    = [action.Ambassador, action.Duke]
+        
+        player2             = AlwaysCallingPlayer()
+        player2.influence   = [action.Ambassador, action.Duke]      
+        
+        GameState.Deck      = [action.Duke, action.Assassin]
+        
+        def randomShuffle(deck):    pass            # does not shuffle
+        def randomSelector(deck):   return deck[0]  # select the first card in the deck
+        
+        # change the random functions used by the Game State so we can test
+        GameState.randomShuffle  = randomShuffle
+        GameState.randomSelector = randomSelector
+
+        status, response = player.play(action.Ambassador)
+        self.assertTrue(status, response)
+
+        self.assertEqual(len(player.influence), 2)
+        self.assertEqual(len(player2.influence), 1)
+        
+        self.assertEqual(player.influence[0], action.Duke)
+        self.assertEqual(player.influence[1], action.Duke)
+        self.assertEqual(GameState.Deck[0], action.Assassin)
+        self.assertEqual(GameState.Deck[1], action.Ambassador)
+           
         
 class Players(unittest.TestCase):
     def setUp(self):
@@ -250,7 +291,7 @@ class Players(unittest.TestCase):
         """ 
         Tests related to the court deck found in GameState class.
             Card Drawing 
-            Drawing card from an empty deck (should return False)
+            Drawing card from an empty deck (should raise MajorError)
             Returning card to deck
         """
         GameState.Deck = [action.Income]
@@ -259,8 +300,8 @@ class Players(unittest.TestCase):
         self.assertEqual(len(GameState.Deck), 0)
         self.assertEqual(action.Income, card)
 
-        card = GameState.DrawCard()        
-        self.assertFalse(card)
+        with self.assertRaises(action.MajorError):
+            card = GameState.DrawCard()
 
         GameState.AddToDeck(action.ForeignAid)
         
@@ -321,17 +362,25 @@ class Players(unittest.TestCase):
 
     def test_ForceCoup(self):
         player = self.player
-        player.coins = 12
         
+        # test that player can't play any actions other than coup when holding more than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins
         with self.assertRaises(action.ActionNotAllowed):
             status, response = player.play(action.Income)
-        self.assertEqual(player.coins, 12)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
 
-        player.coins = 12
+        # test that player can play any actions other than coup when holding less than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins - 1
+        status, response = player.play(action.Income)
+        self.assertTrue(status, response)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
+        
+        # test that dead players can't play any actions other than coup when holding more than action.ForceCoupCoins coins
+        player.coins = action.ForceCoupCoins
         player.alive = False
         with self.assertRaises(action.DeadPlayer):
             status, response = player.play(action.Income)
-        self.assertEqual(player.coins, 12)
+        self.assertEqual(player.coins, action.ForceCoupCoins)
             
     
 class BlockingSystem(unittest.TestCase):
@@ -453,26 +502,121 @@ class BlockingSystem(unittest.TestCase):
         
         self.assertEqual(len(player.influence), 1)
         self.assertEqual(len(player_blocker.influence), 2)
+
+    def test_CallBlockingActionAsBluffWithOneInfluence_Fail(self):
+        """ 
+        Opoosing player blocks action. 
+        Active player, with one influence, calls bluff. 
+        Opposing player is telling the truth. Their card should be shuffled back and active player should loses the game.
+        The action should fail.
+        """
+        #todo: use a mock object to create a mock action that is blockable
         
-    class BlockingPlayerThatLoseGame(Player):
+        player            = BlockingSystem.AlwaysCallingPlayer()
+        player.influence  = [action.Duke]
+        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.Duke)
+        player_blocker.influence = [action.Duke, action.Duke]
+        
+        self.assertEqual(len(player.influence), 1)
+        self.assertEqual(len(player_blocker.influence), 2)
+
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.ForeignAid)
+        self.assertFalse(status)
+        self.assertEqual(player.coins, 2)
+        
+        self.assertFalse(player.alive)
+        self.assertEqual(len(player.influence), 0)
+        self.assertEqual(len(player_blocker.influence), 2)
+
+    def test_ChallengeFailAndPlayerShouldShuffleShownCard(self):
+        """ 
+        Create a scenario where active player plays action, opposing player calls bluff, active player is telling the truth.
+        This will test that the active player's card is revealed, returned to the player deck and a new card is drawn.
+        This will also test if after returning the card, the action still plays
+        """
+        #todo: use a mock object to create a mock action that is blockable
+        
+        player            = self.player
+        player.influence  = [action.Income, action.Duke]
+        player_caller     = BlockingSystem.AlwaysCallingPlayer()
+        
+        def randomShuffle(deck):    pass            # does not shuffle
+        def randomSelector(deck):   return deck[0]  # select the first card in the deck
+        
+        # change the random functions used by the Game State so we can test
+        GameState.randomShuffle  = randomShuffle
+        GameState.randomSelector = randomSelector
+        GameState.Deck = [action.Income]
+        
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.Duke)
+        self.assertTrue(status, response)
+        self.assertEqual(player.coins, 5)
+        
+        self.assertEqual(len(player.influence), 2)
+        self.assertEqual(len(player_caller.influence), 1)
+        
+        # check that the winner of the challenge draw from the deck.
+        self.assertEqual(player.influence[0], action.Income)
+        self.assertEqual(player.influence[1], action.Income)
+        self.assertEqual(GameState.Deck[0], action.Duke)
+        
+
+    def test_PlayerIsBlockedAndChallengeFailAndBlockerShouldShuffleShownCard(self):
+        """ 
+        Create a scenario where active player plays action, opposing player blocks, active player calls and
+        opposing player is telling the truth.
+        This will test that the blocking player's card is revealed, returned to the player deck and a new card is drawn.
+        This will also test if after returning the card, the action is still blocked
+        """
+        #todo: use a mock object to create a mock action that is blockable
+        
+        player            = BlockingSystem.AlwaysCallingPlayer()
+        player.influence  = [action.Captain, action.Captain]
+        player_blocker    = BlockingSystem.AlwaysBlockingPlayer(action.Captain)
+        player_blocker.influence  = [action.Captain, action.Duke]
+        
+        def randomShuffle(deck):    pass            # does not shuffle
+        def randomSelector(deck):   return deck[0]  # select the first card in the deck
+        
+        # change the random functions used by the Game State so we can test
+        GameState.randomShuffle  = randomShuffle
+        GameState.randomSelector = randomSelector
+        GameState.Deck = [action.Duke]
+
+        self.assertEqual(player.coins, 2)
+        status, response = player.play(action.Captain, player_blocker)
+        self.assertFalse(status, response)
+        self.assertEqual(player.coins, 2)
+        
+        self.assertEqual(len(player.influence), 1)
+        self.assertEqual(len(player_blocker.influence), 2)
+        
+        # check that the winner of the challenge draw from the deck.
+        self.assertEqual(player.influence[0], action.Captain)
+        self.assertEqual(player_blocker.influence[0], action.Duke)
+        self.assertEqual(player_blocker.influence[1], action.Duke)
+        self.assertEqual(GameState.Deck[0], action.Captain)        
+                
+    class PlayerCallToLoseAndCannotBlock(Player):
         """For testing of complex scenario in test_BlockingPlayerBluffIsCalledAndTheyLoseGame()"""
         def confirmCall(self, activePlayer, action):
-            raise action.DeadPlayer
+            return True
             
         def confirmBlock(self, opponentAction): 
-            return action.Captain
+            raise action.DeadPlayer
 
-    def test_BlockingPlayerBluffIsCalledAndTheyLoseGame(self):
+    def test_PlayerCallToLoseAndCannotBlock(self):
         """ 
         This test the following scenario:
             1. Active player plays an action
-            2. Another player with one influence left blocks
-            3. Active player calls bluff
-            4. Blocking player loses their last influence
-            5. Blocking player SHOULD NOT get the ability to call active player's action
+            2. Another player calls bluff but active player is telling the truth
+            3. Blocking player loses their last influence
+            4. Blocking player SHOULD NOT get the ability to block active player's action
         """
         player                   = BlockingSystem.AlwaysCallingPlayer()
-        player_blocker           = BlockingSystem.BlockingPlayerThatLoseGame()
+        player_blocker           = BlockingSystem.PlayerCallToLoseAndCannotBlock()
         player.influence         = [action.Captain, action.Captain]
         player_blocker.influence = [action.Duke]
 
@@ -480,7 +624,7 @@ class BlockingSystem(unittest.TestCase):
         status, response = player.play(action.Captain, player_blocker)
         self.assertEqual(len(player_blocker.influence), 0)
         self.assertFalse(player_blocker.alive)
-        # action.DeadPlayer should never be called. If it does, then step #5 of this scenario happened
+        # action.DeadPlayer should never be called. If it does, then step #4 of this scenario happened
     
 class ActionBlocking(unittest.TestCase):
     def setUp(self):

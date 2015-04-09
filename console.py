@@ -183,6 +183,18 @@ def PrintDeckList():
         for card in deck:
             print(" ", card)
 
+def PrintRevealedCards():
+    size = len(GameState.RevealedCards)
+    if size == 0:
+        return
+        
+    print ("There are %i cards that has been revealed:" % (size))
+
+    reveals = [card.name for card in GameState.RevealedCards]
+    reveals.sort()
+    for card in reveals:
+        print(" ", card)
+
 def MainLoop():
     # Infinite loop until one player remains
     global PlayersAlive, CurrentPlayer
@@ -195,6 +207,7 @@ def MainLoop():
             print("%s's turn (Coins: %i)" % (player.name, player.coins))
             print("=================\n ")
             PrintDeckList()
+            PrintRevealedCards()
             print("\n%s's cards are: " % (player.name), end = "")
             print(" and ".join([card.name for card in player.influence]))
             print()

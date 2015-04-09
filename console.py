@@ -5,12 +5,15 @@ from game   import GameState
 import random
 import os
 
+DebugMode = True
+DebugMode = False
+
 defaultNames = ["Leonardo", "Michaelengelo", "Raphael", "Donatello", "Splinter", "April"]
 
 class ConsolePlayer(Player):
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
-        choice = input ("%s: Do you think %s's %s is a bluff? Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
+        choice = input ("%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
         choice = choice.upper()
         
         if not choice in ('Y', 'N'):
@@ -128,7 +131,7 @@ def Setup():
     GameState.reset()
     
     def GetNumberOfPlayers():
-        PlayerCount = input("How many players? ")
+        PlayerCount = input("How many players (2-6)? ")
         if not PlayerCount.isnumeric():
             return GetNumberOfPlayers()
         
@@ -149,10 +152,11 @@ def Setup():
         if player.name.strip() == "":
             player.name = random.choice(defaultNames)
             defaultNames.remove(player.name)
-            print(" Player %i's name is %s" % (Number + 1, player.name))
+            print(" Player %i's name is %s\n" % (Number + 1, player.name))
                 
         return player
 
+    print("\n")
     for i in range(PlayerCount):
         Players.append(CreatePlayer(i))
         
@@ -169,11 +173,13 @@ def PrintTurnOrder():
         print(" %i: %s" % (i + 1, player.name))
 
 def PrintDeckList():
-    print ("Cards in Court Deck (%i cards):" % (len(GameState.Deck)))
-    deck = [card.name for card in GameState.Deck]
-    deck.sort()
-    for card in deck:
-        print(" ", card)
+    print ("There are %i cards in the Court Deck" % (len(GameState.Deck)))
+    
+    if DebugMode:
+        deck = [card.name for card in GameState.Deck]
+        deck.sort()
+        for card in deck:
+            print(" ", card)
 
 def MainLoop():
     # Infinite loop until one player remains
@@ -184,11 +190,10 @@ def MainLoop():
         
         def PrintInfo():
             os.system("cls")
-            print("%s's turn" % player.name)
-            print(" Coins: %i" % player.coins)
+            print("%s's turn (Coins: %i)" % (player.name, player.coins))
             print("=================\n ")
             PrintDeckList()
-            print("\nCards in hand of %s: " % (player.name), end = "")
+            print("\n%s's cards are: " % (player.name), end = "")
             print(" and ".join([card.name for card in player.influence]))
             print()
 

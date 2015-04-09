@@ -6,8 +6,8 @@ import random
 import os
 
 # Freemode allows the game to allow for any cards to be played
-FreeMode = False
 FreeMode = True
+FreeMode = False
 
 defaultNames = ["Leonardo", "Michelangelo", "Raphael", "Donatello", "Splinter", "April"]
 
@@ -99,11 +99,11 @@ class ConsolePlayer(Player):
             card = input (inputMessage)
             
             if not card.isnumeric():
-                return askChoice(choices)
+                return askChoice(choices, inputMessage)
                 
             card = int(card) - 1
             if card < 0 or card >= len(choices):
-                return askChoice(choices)
+                return askChoice(choices, inputMessage)
             
             card = choices[card]
             return card

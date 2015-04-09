@@ -45,10 +45,10 @@ class Player():
         """
         1. Check if player is alive. If not, throw exception.
         2. Check if player has at least 12 coins. If they do, throw exception unless coup is played.
-        3. Check if a player wants to block
-           a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
-        4. Check if any player wants to call bluff from active player
+        3. Check if any player wants to call bluff from active player
            a. If someone wants to call bluff, do Call step
+        4. Check if a player wants to block
+           a. If active player wants to call bluff, do Call step (todo: official rules says any play can call bluff. implement later)
         5. Play action if successful
         Call step: If someone call the bluff, reveal card. 
                    If card is the action played, remove influence from player.
@@ -67,6 +67,21 @@ class Player():
             raise ActionNotAllowed("Player has %i coins. Forced Coup is the only action" % (self.coins))
         
         # Step 3
+        callingPlayer = None
+        
+        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
+            callingPlayer = GameState.requestCallForBluffs(self, action)
+            
+        if callingPlayer != None:
+            # step 4.a
+            if action in self.influence:
+                callingPlayer.loseInfluence()
+            else:
+                self.loseInfluence()
+                message = "Bluffing %s failed for %s" % (action.name, self.name)
+                return False, message             
+        
+        # Step 4
         blockingPlayer = None
         
         # should only call bluff for cards, not common actions
@@ -89,22 +104,7 @@ class Player():
             else:
                 message = "Blocked by %s" % blockingPlayer.name
                 return False, message
-        
-        # Step 4
-        
-        callingPlayer = None
-        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
-            callingPlayer = GameState.requestCallForBluffs(self, action)
-            
-        if callingPlayer != None:
-            # step 4.a
-            if action in self.influence:
-                callingPlayer.loseInfluence()
-            else:
-                self.loseInfluence()
-                message = "Bluffing %s failed for %s" % (action.name, self.name)
-                return False, message             
-        
+                
         # Step 5
         status, response = action.play(action, self, target)
         return status, response

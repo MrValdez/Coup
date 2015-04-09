@@ -454,25 +454,24 @@ class BlockingSystem(unittest.TestCase):
         self.assertEqual(len(player.influence), 1)
         self.assertEqual(len(player_blocker.influence), 2)
         
-    class BlockingPlayerThatLoseGame(Player):
+    class PlayerCallToLoseAndCannotBlock(Player):
         """For testing of complex scenario in test_BlockingPlayerBluffIsCalledAndTheyLoseGame()"""
         def confirmCall(self, activePlayer, action):
-            raise action.DeadPlayer
+            return True
             
         def confirmBlock(self, opponentAction): 
-            return action.Captain
+            raise action.DeadPlayer
 
-    def test_BlockingPlayerBluffIsCalledAndTheyLoseGame(self):
+    def test_PlayerCallToLoseAndCannotBlock(self):
         """ 
         This test the following scenario:
             1. Active player plays an action
-            2. Another player with one influence left blocks
-            3. Active player calls bluff
-            4. Blocking player loses their last influence
-            5. Blocking player SHOULD NOT get the ability to call active player's action
+            2. Another player calls bluff but active player is telling the truth
+            3. Blocking player loses their last influence
+            4. Blocking player SHOULD NOT get the ability to block active player's action
         """
         player                   = BlockingSystem.AlwaysCallingPlayer()
-        player_blocker           = BlockingSystem.BlockingPlayerThatLoseGame()
+        player_blocker           = BlockingSystem.PlayerCallToLoseAndCannotBlock()
         player.influence         = [action.Captain, action.Captain]
         player_blocker.influence = [action.Duke]
 
@@ -480,7 +479,7 @@ class BlockingSystem(unittest.TestCase):
         status, response = player.play(action.Captain, player_blocker)
         self.assertEqual(len(player_blocker.influence), 0)
         self.assertFalse(player_blocker.alive)
-        # action.DeadPlayer should never be called. If it does, then step #5 of this scenario happened
+        # action.DeadPlayer should never be called. If it does, then step #4 of this scenario happened
     
 class ActionBlocking(unittest.TestCase):
     def setUp(self):

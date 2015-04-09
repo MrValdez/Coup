@@ -464,7 +464,10 @@ class BlockingSystem(unittest.TestCase):
         player.influence         = [action.Captain, action.Captain]
         player_blocker.influence = [action.Duke]
 
+        self.assertEqual(len(player_blocker.influence), 1)
         status, response = player.play(action.Captain, player_blocker)
+        self.assertEqual(len(player_blocker.influence), 0)
+        self.assertFalse(player_blocker.alive)
         # action.DeadPlayer should never be called. If it does, then step #5 of this scenario happened
     
 class ActionBlocking(unittest.TestCase):

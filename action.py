@@ -1,5 +1,6 @@
 # Coup specific exceptions
 #   TargetRequired
+#   NotEnoughCoins
 #   BlockOnly
 #   DeadPlayer
 #   InvalidTarget
@@ -20,11 +21,17 @@ from game import GameState
 class TargetRequired(Exception):   pass
 class BlockOnly(Exception):        pass
 class DeadPlayer(Exception):        pass
+
+class NotEnoughCoins(Exception):
+    def __init__(self, coinsNeeded):
+        self.coinsNeeded = coinsNeeded
+        
 class InvalidTarget(Exception):    
     def __init__(self, message):
         self.message = message
     def __str__(self):
         return self.message
+
 class ActionNotAllowed(Exception):
     def __init__(self, message):
         self.message = message
@@ -73,14 +80,14 @@ class Coup(Action):
     def play(self, player, target = None):
         # player should have 7 coins. 
         if player.coins < 7:
-            return False, "Not enough coins"
+            raise NotEnoughCoins(7)
             
         # target should be alive
         if target == None:
             raise TargetRequired
                         
         if not target.alive:
-            return False, "Invalid target"
+            raise InvalidTarget("Target is dead")
             
         player.coins -= 7
         target.loseInfluence()
@@ -133,7 +140,7 @@ class Assassin(Action):
             
     def play(self, player, target = None):
         if player.coins < 3:
-            return False, "Not enough coins"
+            raise NotEnoughCoins(3)
         if target == None:
             raise TargetRequired
             

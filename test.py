@@ -33,8 +33,9 @@ class Actions(unittest.TestCase):
 
         # test for no player having insufficient money
         player.coins = 6
-        status, response = player.play(action.Coup, player2)
-        self.assertFalse(status, response)
+        with self.assertRaises(action.NotEnoughCoins) as exc:
+            status, response = player.play(action.Coup, player2)
+        self.assertEqual(exc.exception.coinsNeeded, 7)
                 
         # test for targetting self
         player.coins = 7
@@ -59,6 +60,12 @@ class Actions(unittest.TestCase):
         self.assertLess(player.coins, 7)
         self.assertEqual(len(player2.influence), 0)
         self.assertFalse(player2.alive)
+        
+        # test for coup against dead opponent
+        player2.alive = False
+        player.coins = 7
+        with self.assertRaises(action.DeadPlayer):
+            status, response = player.play(action.Coup, player2)
                 
     def test_Duke(self):
         player = self.player
@@ -108,29 +115,33 @@ class Actions(unittest.TestCase):
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(len(player2.influence), 2)
         
-    def test_Assasin(self):
+    def test_Assassin(self):
         player  = self.player
         player2 = Player()
         
         # test for no player having insufficient money
         player.coins = 2
         self.assertEqual(len(player2.influence), 2)
-        status, response = player.play(action.Coup, player2)
-        self.assertFalse(status, response)
+        
+        with self.assertRaises(action.NotEnoughCoins) as exc:
+            status, response = player.play(action.Assassin, player2)
+        self.assertEqual(exc.exception.coinsNeeded, 3)
         self.assertEqual(len(player2.influence), 2)
         self.assertEqual(player.coins, 2)
         
+        # test with sufficient money, no target
         player.coins = 3
         with self.assertRaises(action.TargetRequired):
             status, response = player.play(action.Assassin)
-        
         self.assertEqual(len(player2.influence), 2)
         
+        # test with sufficient money against player with 2 influences
         self.assertEqual(player.coins, 3)
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(player.coins, 0)
         self.assertEqual(len(player2.influence), 1)
         
+        # test with sufficient money against 1 influence and killing them
         player.coins = 3
         status, response = player.play(action.Assassin, player2)
         self.assertEqual(player.coins, 0)

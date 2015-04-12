@@ -31,7 +31,7 @@ class ConsolePlayer(Player):
         choice = choice.upper()
         
         if not choice.strip() in ('Y', 'N', ''):
-            print (" Type Y to call bluff. Type N or press enter to allow %s's %s." % (activePlayer.name, action.name))
+            print ("\n Type Y to call bluff. \n Type N or press enter to allow %s's %s.\n" % (activePlayer.name, action.name))
             return self.confirmCall(activePlayer, action)
             
         if choice == 'Y':
@@ -113,8 +113,11 @@ class ConsolePlayer(Player):
         finalChoices = []
         
         def askChoice(choices, inputMessage):
+            print("")
             for i, choice in enumerate(choices):
                 print (" %i: %s" % (i + 1, choice.name))
+            
+            print("")
             card = input (inputMessage)
             
             if not card.isnumeric():
@@ -127,9 +130,11 @@ class ConsolePlayer(Player):
             card = choices[card]
             return card
         
+        ClearScreen("Ambassador success", 24)
+
         print("\n%s, these are the cards you drew:" % (self.name))
         
-        card1 = askChoice(choices, "Select the first card to take>")
+        card1 = askChoice(choices, "Select the first card to take> ")
         choices.remove(card1)
         
         if (influenceRemaining == 1):
@@ -160,10 +165,23 @@ def ClearScreen(headerMessage, headerSize = 10):
     print(decode("|%s|"  % (headerMessage.center(headerSize))))
     print(decode("\\%s/" % ('-' * headerSize)))
     
-def PrintTurnOrder():
-    ClearScreen("Turn order")
+def PrintTurnOrder(currentPlayerShown):
+    header = [" Turn order", ""]    
+    
     for i, player in enumerate(Players):
-        print(" %i: %s" % (i + 1, player.name))
+        headerStr = "   %i: %s" % (i + 1, player.name)
+        if player == currentPlayerShown:
+            headerStr = "  >" + headerStr.strip()
+        header.append(headerStr)
+        
+    maxLen = max([len(row) for row in header]) + 2
+    for i, row in enumerate(header):
+        header[i] = row + (" " * (maxLen - len(row)))
+        
+    header[1] = "-" * maxLen
+        
+    ClearScreen("|\n|".join(header), maxLen)
+        
 
 def PrintDeckList():
     print ("There are %i cards in the Court Deck" % (len(GameState.Deck)))
@@ -258,7 +276,7 @@ def SetupRNG():
 def Setup():
     # How many people are playing?
     # Generate the player list
-    # Shuffle the player list
+    # Shuffle the player list    
     GameState.reset()
     SetupActions()
     
@@ -417,8 +435,7 @@ def MainLoop():
                 return PossibleTargets[target]
 
             if player.coins < AvailableActions[move].coinsNeeded:
-                action = AvailableActions[move]
-                print(" You need %i coins to play %s. You only have %i coins." % (action.coinsNeeded, action.name, player.coins))
+                print(" You need %i coins to play %s. You only have %i coins." % (AvailableActions[move].coinsNeeded, AvailableActions[move].name, player.coins))
                 ChooseAction()
                 return
                 
@@ -476,12 +493,23 @@ def MainLoop():
             if GameIsRunning: input("\nPress enter key to continue...")
         Cleanup()
         
-    print("\nThe winner is %s" % (PlayersAlive[0].name))
-
+    if len(PlayersAlive) > 1: 
+        print("\nThe winner is %s" % (PlayersAlive[0].name))
+    
 def main():
     ClearScreen("Game Setup", 50)
     Setup()
-    PrintTurnOrder()
+
+    for player in Players:
+        PrintTurnOrder(player)
+        
+        input("\n%s, press ENTER to see your cards" % player.name)
+        padding = " " * (len(player.name) + 2)
+        heldCards = " and ".join([card.name for card in player.influence])
+        print("\n%s\n" % (padding + heldCards))
+        input("%sPress ENTER to hide your cards" % (padding))
+
+    ClearScreen("Game start", 14)
     input("\nPress enter key to start...")
     MainLoop()
     

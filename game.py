@@ -37,7 +37,7 @@ class GameState:
             if player == activePlayer or not player.alive: 
                 continue
             
-            blockingAction = player.confirmBlock(action)
+            blockingAction = player.confirmBlock(activePlayer, action)
             
             if blockingAction != None: 
                 # check that the block is valid

@@ -490,10 +490,10 @@ def MainLoop():
             PrintActions()
             ChooseAction()
             
-            if GameIsRunning: input("\nPress enter key to continue...")
         Cleanup()
+        if GameIsRunning: input("\n%s, press enter key to take your turn..." % Players[CurrentPlayer].name)
         
-    if len(PlayersAlive) > 1: 
+    if len(PlayersAlive) == 1: 
         print("\nThe winner is %s" % (PlayersAlive[0].name))
     
 def main():
@@ -510,7 +510,7 @@ def main():
         input("%sPress ENTER to hide your cards" % (padding))
 
     ClearScreen("Game start", 14)
-    input("\nPress enter key to start...")
+    input("\n%s, press enter key to start the game..." % (Players[0].name))
     MainLoop()
     
 if __name__ == "__main__":

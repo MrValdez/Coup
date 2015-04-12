@@ -107,7 +107,7 @@ class Actions(unittest.TestCase):
             
         # using Contessa as a block
         class BlockWithContessa(Player):
-            def confirmBlock(self, opponentAction): 
+            def confirmBlock(self, activePlayer, opponentAction):
                 return action.Contessa
                 
         player2 = BlockWithContessa()
@@ -396,7 +396,7 @@ class Players(unittest.TestCase):
                 self.position = position
                 self.Order = Order
                 Player.__init__(self)
-            def confirmBlock(self, opponentAction):
+            def confirmBlock(self, activePlayer, opponentAction):
                 self.Order.append(self.position)
                 return None
 
@@ -454,11 +454,11 @@ class BlockingSystem(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, opponentAction): 
+        def confirmBlock(self, activePlayer, opponentAction):
             return self.CardUsedToBlock
 
     class NeverBlockingPlayer(Player):
-        def confirmBlock(self, opponentAction): return None
+        def confirmBlock(self, activePlayer, opponentAction): return None
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True
@@ -677,7 +677,7 @@ class BlockingSystem(unittest.TestCase):
         def confirmCall(self, activePlayer, action):
             return True
             
-        def confirmBlock(self, opponentAction): 
+        def confirmBlock(self, activePlayer, opponentAction):
             raise action.DeadPlayer
 
     def test_PlayerCallToLoseAndCannotBlock(self):
@@ -710,11 +710,11 @@ class ActionBlocking(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, opponentAction): 
+        def confirmBlock(self, activePlayer, opponentAction):
             return self.CardUsedToBlock
 
     class NeverBlockingPlayer(Player):
-        def confirmBlock(self, opponentAction): return None
+        def confirmBlock(self, activePlayer, opponentAction): return None
 
     class AlwaysCallingPlayer(Player):
         def confirmCall(self, activePlayer, action): return True
@@ -757,7 +757,7 @@ class CallBluff(unittest.TestCase):
             self.CardUsedToBlock = CardUsedToBlock
             Player.__init__(self)
             
-        def confirmBlock(self, opponentAction): 
+        def confirmBlock(self, activePlayer, opponentAction):
             return self.CardUsedToBlock
 
     def test_SelfCalling(self):
@@ -825,7 +825,7 @@ class CallBluff(unittest.TestCase):
     def test_Assasinate_FailedContessaBluff(self):
         """ Important rule test: An assasination attempt is done to opponent. Opponent bluff with Contessa. Active player calls bluff. The opposing player should lose. This will test for situations where the opposing player has two or one influence """
         class ContessaBluffer(Player):
-            def confirmBlock(self, opponentAction): return action.Contessa
+            def confirmBlock(self, activePlayer, opponentAction): return action.Contessa
 
         player  = CallBluff.AlwaysCallingPlayer()
         player2 = ContessaBluffer()

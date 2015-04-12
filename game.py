@@ -7,7 +7,7 @@ class GameState:
         self.PlayerList = []
         
         self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
-        self.CardsAvailable = [action.Duke, action.Captain, action.Contessa, action.Assassin, action.Ambassador]
+        self.CardsAvailable = [action.Duke, action.Captain, action.Assassin, action.Ambassador, action.Contessa]
         self.Deck = self.CardsAvailable * 3
         random.shuffle(self.Deck)
         
@@ -37,7 +37,7 @@ class GameState:
             if player == activePlayer or not player.alive: 
                 continue
             
-            blockingAction = player.confirmBlock(action)
+            blockingAction = player.confirmBlock(activePlayer, action)
             
             if blockingAction != None: 
                 # check that the block is valid

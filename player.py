@@ -128,7 +128,7 @@ class Player():
         # todo: raise notImplemented. should be overriden
         return False
             
-    def confirmBlock(self, opponentAction):
+    def confirmBlock(self, activePlayer, opponentAction):
         """ returns action used by player to blocks action. return None if player allows action. """
         # todo: raise notImplemented. should be overriden
         return None

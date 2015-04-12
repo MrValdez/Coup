@@ -22,7 +22,12 @@ class ConsolePlayer(Player):
 
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
-        choice = input ("%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
+        longestName = [len(player.name) for player in PlayersAlive]
+        longestName = max(longestName)
+        
+        name = self.name + "," + (" " * (longestName - len(self.name)))
+        
+        choice = input ("%s do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (name, activePlayer.name, action.name))
         choice = choice.upper()
         
         if not choice.strip() in ('Y', 'N', ''):
@@ -45,14 +50,17 @@ class ConsolePlayer(Player):
         totalBlockers = len(cardBlockers) + 1
         
         if ConsolePlayer.ShowBlockOptions:
-            ConsolePlayer.ShowBlockOptions = False
+            ConsolePlayer.ShowBlockOptions = False            
             
             print ("\n%s's %s can be blocked with the following cards:" % (activePlayer.name, opponentAction.name))
             for i, card in enumerate(cardBlockers):
                 print(" %i: %s" % (i + 1, card.name))
             print(" %i: (Do not block)\n" % (totalBlockers))            
             
-        choice = input("%s, do you wish to block %s (1-%i)? " % (self.name, opponentAction.name, totalBlockers))
+        longestName = [len(player.name) for player in PlayersAlive]
+        longestName = max(longestName)
+        name = self.name + "," + (" " * (longestName - len(self.name)))
+        choice = input("%s do you wish to block %s (1-%i)? " % (name, opponentAction.name, totalBlockers))
         choice = choice.strip()
         if choice == "":
             choice = str(totalBlockers)      # do not block

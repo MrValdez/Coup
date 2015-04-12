@@ -131,13 +131,29 @@ class ConsolePlayer(Player):
             card2 = askChoice(choices, "Select the second card to take>")
             return [card1, card2]
 
-def ClearScreen():
+def ClearScreen(headerMessage, headerSize = 10):
     # todo: make this crossplatform
     os.system("cls")
     
+    # http://stackoverflow.com/questions/17254780/printing-extended-ascii-characters-in-python-3-in-both-windows-and-linux
+    dic = {
+    '\\' : b'\xe2\x95\x9a',
+    '-'  : b'\xe2\x95\x90',
+    '/'  : b'\xe2\x95\x9d',
+    '|'  : b'\xe2\x95\x91',
+    '+'  : b'\xe2\x95\x94',
+    '%'  : b'\xe2\x95\x97',
+    }
+
+    def decode(x):
+        return (''.join(dic.get(i, i.encode('utf-8')).decode('utf-8') for i in x))
+
+    print(decode("+%s%%" % ('-' * headerSize)))
+    print(decode("|%s|"  % (headerMessage.center(headerSize))))
+    print(decode("\\%s/" % ('-' * headerSize)))
+    
 def PrintTurnOrder():
-    ClearScreen()
-    print ("Turn order:")
+    ClearScreen("Turn order")
     for i, player in enumerate(Players):
         print(" %i: %s" % (i + 1, player.name))
 
@@ -289,11 +305,12 @@ def MainLoop():
         player = Players[CurrentPlayer]
         ConsolePlayer.ShowBlockOptions = True
         
-        def PrintInfo():
-            os.system("cls")
-            
+        def PrintInfo():            
             PlayerList = Players[CurrentPlayer:] + Players[0:CurrentPlayer]
             paddingWidth = 16
+            headerList = []
+            headerStr = ""
+            rowWidth = 0
             
             for playerInfo in PlayerList:            
                 name = playerInfo.name 
@@ -301,20 +318,32 @@ def MainLoop():
                     name = name[:paddingWidth - 4] + "... "
                 
                 padding = " " * (paddingWidth - len(name))
-                print("%s" % (name), end = padding)                    
+                headerStr += name + padding
 
+            rowWidth = max(rowWidth, len(headerStr))
+            headerList.append(headerStr)
+            headerStr = ""
             
-            print("")
             for playerInfo in PlayerList:            
                 coins = playerInfo.coins
                 coins = "Coins: %i" % (coins)
                 coins = coins.rjust(2)
                 
                 padding = " " * (paddingWidth - len(coins))
-                print(coins, end = padding)
+                headerStr += coins + padding
             
-            print("\n(Active player)")
-            print("" + "=" * (paddingWidth * len(PlayerList))  + "\n")
+            rowWidth = max(rowWidth, len(headerStr))
+            headerList.append(headerStr)
+            
+            headerStr = "(Active player)" + (paddingWidth * " ")
+            rowWidth = max(rowWidth, len(headerStr))
+            headerList.append(headerStr)
+            
+            for i, header in enumerate(headerList):
+                headerList[i] += " " * (rowWidth - len(headerList[i]))
+            
+            ClearScreen("|\n|".join(headerList), rowWidth)
+            
             PrintDeckList()
             PrintRevealedCards()
             print("\n%s's cards are: " % (player.name))
@@ -422,7 +451,7 @@ def MainLoop():
     print("\nThe winner is %s" % (PlayersAlive[0].name))
 
 def main():
-    ClearScreen()
+    ClearScreen("Game Setup", 50)
     Setup()
     PrintTurnOrder()
     input("\nPress enter key to start...")

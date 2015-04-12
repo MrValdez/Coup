@@ -167,6 +167,7 @@ def PrintActions():
     for i, action in enumerate(AvailableActions):
         if action.name != "Contessa":   # ignore Contessa as a possible action.
             print (" %i: %s" % (i + 1, action.name))
+    print (" X: Exit the game")
 
 def SelectCards(message, twoCards):
     print(message)
@@ -265,9 +266,10 @@ def Setup():
     
 def MainLoop():
     # Infinite loop until one player remains
-    global PlayersAlive, CurrentPlayer
+    global PlayersAlive, CurrentPlayer, GameIsRunning
     
-    while len(PlayersAlive) > 1:
+    GameIsRunning = True
+    while GameIsRunning and len(PlayersAlive) > 1:
         player = Players[CurrentPlayer]
         
         def PrintInfo():
@@ -291,6 +293,15 @@ def MainLoop():
         def ChooseAction():    
             move = input ("Action> ")
             if not move.isnumeric():
+                if move.upper() == "X":
+                    confirm = input ("\nAre you sure you want to exit (Y/N)? ")
+                    if confirm.upper() != "Y":                      
+                        ChooseAction()
+                        return  
+                    
+                    global GameIsRunning    
+                    GameIsRunning = False
+                    return
                 ChooseAction()
                 return
             move = int(move) - 1
@@ -363,7 +374,8 @@ def MainLoop():
             print("Available actions:")
             PrintActions()
             ChooseAction()
-            input("\nPress enter key to continue...")
+            
+            if GameIsRunning: input("\nPress enter key to continue...")
         Cleanup()
         
     print("\nThe winner is %s" % (PlayersAlive[0].name))

@@ -274,8 +274,28 @@ def MainLoop():
         
         def PrintInfo():
             os.system("cls")
-            print("%s's turn (Coins: %i)" % (player.name, player.coins))
-            print("=================\n ")
+            
+            PlayerList = Players[CurrentPlayer:] + Players[0:CurrentPlayer]
+            
+            paddingWidth = 15
+            for playerInfo in PlayerList:            
+                name = playerInfo.name 
+                if len(name) > paddingWidth: 
+                    name = name[:paddingWidth] + "..."
+                
+                padding = " " * (paddingWidth - len(name))
+                print("%s" % (name), end = padding)
+
+            print("\n")
+            for playerInfo in PlayerList:            
+                coins = playerInfo.coins
+                coins = "Coins: %i" % (coins)
+                coins = coins.rjust(2)
+                
+                padding = " " * (paddingWidth - len(coins))
+                print(coins, end = padding)
+            
+            print("\n=================\n ")
             PrintDeckList()
             PrintRevealedCards()
             print("\n%s's cards are: " % (player.name), end = "")

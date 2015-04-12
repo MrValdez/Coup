@@ -22,10 +22,12 @@ class ConsolePlayer(Player):
 
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
-        longestName = [len(player.name) for player in PlayersAlive]
-        longestName = max(longestName)
-        
-        name = self.name + "," + (" " * (longestName - len(self.name)))
+        if len(PlayersAlive) > 2:
+            longestName = [len(player.name) for player in PlayersAlive]
+            longestName = max(longestName)            
+            name = self.name + "," + (" " * (longestName - len(self.name)))
+        else:
+            name = self.name + ","
         
         choice = input ("%s do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (name, activePlayer.name, action.name))
         choice = choice.upper()
@@ -56,10 +58,14 @@ class ConsolePlayer(Player):
             for i, card in enumerate(cardBlockers):
                 print(" %i: %s" % (i + 1, card.name))
             print(" %i: (Do not block)\n" % (totalBlockers))            
-            
-        longestName = [len(player.name) for player in PlayersAlive]
-        longestName = max(longestName)
-        name = self.name + "," + (" " * (longestName - len(self.name)))
+        
+        if len(PlayersAlive) > 2:
+            longestName = [len(player.name) for player in PlayersAlive]
+            longestName = max(longestName)
+            name = self.name + "," + (" " * (longestName - len(self.name)))
+        else:
+            name = self.name + ","
+        
         choice = input("%s do you wish to block %s (1-%i)? " % (name, opponentAction.name, totalBlockers))
         choice = choice.strip()
         if choice == "":
@@ -218,7 +224,7 @@ def PrintRevealedCards():
     reveals = [card.name for card in GameState.RevealedCards]
     reveals.sort()
     for card in reveals:
-        print(" ", card)
+        print("   ", card)
 
 def PrintActions():
     for i, action in enumerate(AvailableActions):
@@ -377,9 +383,9 @@ def MainLoop():
             print("")
             PrintDeckList()
             PrintRevealedCards()
-            print("\n%s's cards are: " % (player.name))
+            print("\n\n%s's cards are: " % (player.name))
             heldCards = " and ".join([card.name for card in player.influence])
-            print(" " + heldCards + "\n")
+            print("    " + heldCards)
         
         def Cleanup():
             global CurrentPlayer

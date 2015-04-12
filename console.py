@@ -18,13 +18,15 @@ CurrentPlayer = 0
 AvailableActions = []
 
 class ConsolePlayer(Player):
+    ShowBlockOptions = True         # global variable to show possible options for blocking. set to True every turn
+
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
         choice = input ("\n%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
         choice = choice.upper()
         
         if not choice in ('Y', 'N'):
-            print (" Type Y or N.")
+            print ("Type Y or N.")
             return self.confirmCall(activePlayer, action)
             
         if choice == 'Y':
@@ -40,12 +42,17 @@ class ConsolePlayer(Player):
             if opponentAction.name in card.blocks:
                 cardBlockers.append(card)
 
-        print ("\n%s can be blocked with the following cards:" % (opponentAction.name))
-        for i, card in enumerate(cardBlockers):
-            print(" %i: %s" % (i + 1, card.name))
-        print(" %i: (Do not block)" % (len(cardBlockers) + 1))
+        totalBlockers = len(cardBlockers) + 1
+        
+        if ConsolePlayer.ShowBlockOptions:
+            ConsolePlayer.ShowBlockOptions = False
             
-        choice = input("%s, do you wish to block %s? " % (self.name, opponentAction.name))
+            print ("\n%s can be blocked with the following cards:" % (opponentAction.name))
+            for i, card in enumerate(cardBlockers):
+                print(" %i: %s" % (i + 1, card.name))
+            print(" %i: (Do not block)\n" % (totalBlockers))            
+            
+        choice = input("%s, do you wish to block %s (1-%i)? " % (self.name, opponentAction.name, totalBlockers))
         if not choice.isnumeric():
             print (" Invalid choice, try again\n")
             return self.confirmBlock(opponentAction)
@@ -60,7 +67,7 @@ class ConsolePlayer(Player):
             
         block = cardBlockers[choice - 1]
         
-        print("\n%s is blocking with %s\n" % (self.name, block.name))
+        print("\n\n%s is blocking with %s" % (self.name, block.name))
         return block
         
     def selectInfluenceToDie(self):
@@ -119,9 +126,14 @@ class ConsolePlayer(Player):
             print("")
             card2 = askChoice(choices, "Select the second card to take>")
             return [card1, card2]
+
+def ClearScreen():
+    # todo: make this crossplatform
+    os.system("cls")
     
 def PrintTurnOrder():
-    print ("\nTurn order:")
+    ClearScreen()
+    print ("Turn order:")
     for i, player in enumerate(Players):
         print(" %i: %s" % (i + 1, player.name))
 
@@ -271,6 +283,7 @@ def MainLoop():
     GameIsRunning = True
     while GameIsRunning and len(PlayersAlive) > 1:
         player = Players[CurrentPlayer]
+        ConsolePlayer.ShowBlockOptions = True
         
         def PrintInfo():
             os.system("cls")
@@ -343,6 +356,7 @@ def MainLoop():
                 if len(PossibleTargets) == 1:
                     return PossibleTargets[0]
                 
+                print()
                 for i, iterPlayer in enumerate(PossibleTargets):
                     print(" %i: %s" % (i + 1, iterPlayer.name))
                 target = input ("Choose a target>")
@@ -365,13 +379,14 @@ def MainLoop():
                 target = ChooseTarget()
 
             try:
-                status, response = player.play(AvailableActions[move], target)
-
-                print("\n%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
+                ClearScreen()
+                print("%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
                 if not target is None:
                     print(" (target: %s)" % (target.name))
                 else:
                     print("")
+                
+                status, response = player.play(AvailableActions[move], target)
             except action.ActionNotAllowed as e:
                 print(e.message)
                 ChooseAction()
@@ -393,7 +408,7 @@ def MainLoop():
             
         if player.alive:
             PrintInfo()
-            print("Available actions:")
+            print("\nAvailable actions:")
             PrintActions()
             ChooseAction()
             
@@ -403,7 +418,7 @@ def MainLoop():
     print("\nThe winner is %s" % (PlayersAlive[0].name))
 
 def main():
-    os.system("cls")
+    ClearScreen()
     Setup()
     PrintTurnOrder()
     input("\nPress enter key to start...")

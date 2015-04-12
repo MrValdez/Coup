@@ -70,7 +70,7 @@ class Player():
         callingPlayer = None
         
         if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
-            callingPlayer = GameState.requestCallForBluffs(self, action)
+            callingPlayer = GameState.requestCallForBluffs(self, action, target)
             
         if callingPlayer != None:
             # step 4.a

@@ -165,7 +165,8 @@ def PrintRevealedCards():
 
 def PrintActions():
     for i, action in enumerate(AvailableActions):
-        print (" %i: %s" % (i + 1, action.name))
+        if action.name != "Contessa":   # ignore Contessa as a possible action.
+            print (" %i: %s" % (i + 1, action.name))
 
 def SelectCards(message, twoCards):
     print(message)

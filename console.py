@@ -494,7 +494,7 @@ def MainLoop():
         if GameIsRunning: input("\n%s, press enter key to take your turn..." % Players[CurrentPlayer].name)
         
     if len(PlayersAlive) == 1: 
-        print("\nThe winner is %s" % (PlayersAlive[0].name))
+        ClearScreen("The winner is %s" % (PlayersAlive[0].name), 79)
     
 def main():
     ClearScreen("Game Setup", 50)

@@ -284,9 +284,10 @@ def MainLoop():
                     name = name[:paddingWidth - 4] + "... "
                 
                 padding = " " * (paddingWidth - len(name))
-                print("%s" % (name), end = padding)
+                print("%s" % (name), end = padding)                    
 
-            print("\n")
+            
+            print("")
             for playerInfo in PlayerList:            
                 coins = playerInfo.coins
                 coins = "Coins: %i" % (coins)
@@ -295,12 +296,13 @@ def MainLoop():
                 padding = " " * (paddingWidth - len(coins))
                 print(coins, end = padding)
             
-            print("\n=================\n ")
+            print("\n(Active player)")
+            print("" + "=" * (paddingWidth * len(PlayerList))  + "\n")
             PrintDeckList()
             PrintRevealedCards()
-            print("\n%s's cards are: " % (player.name), end = "")
-            print(" and ".join([card.name for card in player.influence]))
-            print()
+            print("\n%s's cards are: " % (player.name))
+            heldCards = " and ".join([card.name for card in player.influence])
+            print(" " + heldCards + "\n")
         
         def Cleanup():
             global CurrentPlayer

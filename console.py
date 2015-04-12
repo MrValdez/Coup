@@ -59,7 +59,7 @@ class ConsolePlayer(Player):
         
         if not choice.isnumeric():
             print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
-            return self.confirmBlock(opponentAction)
+            return self.confirmBlock(activePlayer, opponentAction)
         choice = int(choice) - 1
         
         if choice == len(cardBlockers):
@@ -67,7 +67,7 @@ class ConsolePlayer(Player):
         
         if not (choice >= 0 and choice < len(cardBlockers)):
             print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
-            return self.confirmBlock(opponentAction)
+            return self.confirmBlock(activePlayer, opponentAction)
             
         block = cardBlockers[choice - 1]
         
@@ -349,6 +349,7 @@ def MainLoop():
             
             ClearScreen("|\n|".join(headerList), rowWidth)
             
+            print("")
             PrintDeckList()
             PrintRevealedCards()
             print("\n%s's cards are: " % (player.name))

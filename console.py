@@ -363,7 +363,7 @@ def MainLoop():
                 print()
                 for i, iterPlayer in enumerate(PossibleTargets):
                     print(" %i: %s" % (i + 1, iterPlayer.name))
-                target = input ("Choose a target>")
+                target = input ("Choose a target> ")
                 
                 if not target.isnumeric():
                     return ChooseTarget()

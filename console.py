@@ -22,17 +22,17 @@ class ConsolePlayer(Player):
 
     def confirmCall(self, activePlayer, action): 
         """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
-        choice = input ("\n%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
+        choice = input ("%s, do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (self.name, activePlayer.name, action.name))
         choice = choice.upper()
         
-        if not choice in ('Y', 'N'):
-            print ("Type Y or N.")
+        if not choice.strip() in ('Y', 'N', ''):
+            print (" Type Y to call bluff. Type N or press enter to allow %s's %s." % (activePlayer.name, action.name))
             return self.confirmCall(activePlayer, action)
             
         if choice == 'Y':
             return True
-        
-        return False
+               
+        return False 
             
     def confirmBlock(self, opponentAction):
         """ returns action used by player to blocks action. return None if player allows action. """
@@ -53,8 +53,13 @@ class ConsolePlayer(Player):
             print(" %i: (Do not block)\n" % (totalBlockers))            
             
         choice = input("%s, do you wish to block %s (1-%i)? " % (self.name, opponentAction.name, totalBlockers))
+        choice = choice.strip()
+        if choice == "":
+            choice = str(totalBlockers)      # do not block
+        
         if not choice.isnumeric():
-            print (" Invalid choice, try again\n")
+            #print (" Select a number between 1-%i. Press enter to allow %s's %s." % (activePlayer.name, opponentAction.name))
+            print (" Select a number between 1-%i. Press enter to allow %s." % (totalBlockers, opponentAction.name))
             return self.confirmBlock(opponentAction)
         choice = int(choice) - 1
         
@@ -62,7 +67,8 @@ class ConsolePlayer(Player):
             return None         # player decides not to block
         
         if not (choice >= 0 and choice < len(cardBlockers)):
-            print (" Invalid choice, try again\n")
+            #print (" Select a number between 1-%i. Press enter to allow %s's %s." % (activePlayer.name, opponentAction.name))
+            print (" Select a number between 1-%i. Press enter to allow %s." % (totalBlockers, opponentAction.name))
             return self.confirmBlock(opponentAction)
             
         block = cardBlockers[choice - 1]
@@ -383,8 +389,8 @@ def MainLoop():
                 print("%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
                 if not target is None:
                     print(" (target: %s)" % (target.name))
-                else:
-                    print("")
+                
+                print("")
                 
                 status, response = player.play(AvailableActions[move], target)
             except action.ActionNotAllowed as e:

@@ -385,6 +385,7 @@ class Players(unittest.TestCase):
     def test_RequestBlocksRotation(self):
         """
         This tests that requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        However, for the sake of game flow, the targetted player (if any) will be requested first.
         """
         GameState.reset()
         GameState.PlayerList = []
@@ -407,14 +408,15 @@ class Players(unittest.TestCase):
         player5 = PlayerNumber(5, Order)
         player6 = PlayerNumber(6, Order)
         
-        status, response = player3.play(action.Captain, player1)
+        status, response = player4.play(action.Captain, player3)
         self.assertTrue(status, response)
 
-        self.assertEqual(Order, [1, 4, 5, 6, 2])
+        self.assertEqual(Order, [3, 5, 6, 1, 2])
     
     def test_RequestCallsRotation(self):
         """
         This tests that requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206).
+        However, for the sake of game flow, the targetted player (if any) will be requested first.
         """
         GameState.reset()
         GameState.PlayerList = []
@@ -437,10 +439,10 @@ class Players(unittest.TestCase):
         player5 = PlayerNumber(5, Order)
         player6 = PlayerNumber(6, Order)
         
-        status, response = player3.play(action.Captain, player1)
+        status, response = player4.play(action.Captain, player3)
         self.assertTrue(status, response)
 
-        self.assertEqual(Order, [4, 5, 6, 1, 2])
+        self.assertEqual(Order, [3, 5, 6, 1, 2])
     
     
 class BlockingSystem(unittest.TestCase):

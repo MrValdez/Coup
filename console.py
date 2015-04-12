@@ -34,7 +34,7 @@ class ConsolePlayer(Player):
                
         return False 
             
-    def confirmBlock(self, opponentAction):
+    def confirmBlock(self, activePlayer, opponentAction):
         """ returns action used by player to blocks action. return None if player allows action. """
         cardBlockers = []
         
@@ -47,7 +47,7 @@ class ConsolePlayer(Player):
         if ConsolePlayer.ShowBlockOptions:
             ConsolePlayer.ShowBlockOptions = False
             
-            print ("\n%s can be blocked with the following cards:" % (opponentAction.name))
+            print ("\n%s's %s can be blocked with the following cards:" % (activePlayer.name, opponentAction.name))
             for i, card in enumerate(cardBlockers):
                 print(" %i: %s" % (i + 1, card.name))
             print(" %i: (Do not block)\n" % (totalBlockers))            
@@ -58,8 +58,7 @@ class ConsolePlayer(Player):
             choice = str(totalBlockers)      # do not block
         
         if not choice.isnumeric():
-            #print (" Select a number between 1-%i. Press enter to allow %s's %s." % (activePlayer.name, opponentAction.name))
-            print (" Select a number between 1-%i. Press enter to allow %s." % (totalBlockers, opponentAction.name))
+            print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
             return self.confirmBlock(opponentAction)
         choice = int(choice) - 1
         
@@ -67,8 +66,7 @@ class ConsolePlayer(Player):
             return None         # player decides not to block
         
         if not (choice >= 0 and choice < len(cardBlockers)):
-            #print (" Select a number between 1-%i. Press enter to allow %s's %s." % (activePlayer.name, opponentAction.name))
-            print (" Select a number between 1-%i. Press enter to allow %s." % (totalBlockers, opponentAction.name))
+            print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
             return self.confirmBlock(opponentAction)
             
         block = cardBlockers[choice - 1]

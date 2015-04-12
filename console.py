@@ -276,12 +276,12 @@ def MainLoop():
             os.system("cls")
             
             PlayerList = Players[CurrentPlayer:] + Players[0:CurrentPlayer]
+            paddingWidth = 16
             
-            paddingWidth = 15
             for playerInfo in PlayerList:            
                 name = playerInfo.name 
-                if len(name) > paddingWidth: 
-                    name = name[:paddingWidth] + "..."
+                if len(name) > paddingWidth - 4: 
+                    name = name[:paddingWidth - 4] + "... "
                 
                 padding = " " * (paddingWidth - len(name))
                 print("%s" % (name), end = padding)

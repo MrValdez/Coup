@@ -84,7 +84,6 @@ class ConsolePlayer(Player):
         
     def selectInfluenceToDie(self):
         """ select an influence to die. returns the value from the influence list. """
-        # todo: raise notImplemented. should be overriden by the input class
         print ("\n%s has lost an influence!" % (self.name))
         
         if len(self.influence) == 1:
@@ -414,7 +413,7 @@ def MainLoop():
             
             def ChooseTarget():
                 PossibleTargets = list(Players)
-                PossibleTargets.remove(player)          #todo: remove this to test if the program handles targetting self
+                PossibleTargets.remove(player)
                 
                 PossibleTargets = [player for player in PossibleTargets if player.alive]
                 
@@ -477,9 +476,11 @@ def MainLoop():
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()
                 return
-            except action.TargetRequired:                        
-                target = ChooseTarget()
-                status, response = player.play(AvailableActions[move], target)
+            except action.TargetRequired:
+                print("You need to select a valid target.\n")
+                PrintActions()
+                ChooseAction()
+                return
                 
             if status == False:
                 print (response)

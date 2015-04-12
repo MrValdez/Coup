@@ -320,7 +320,9 @@ def MainLoop():
                 padding = " " * (paddingWidth - len(name))
                 headerStr += name + padding
 
-            rowWidth = max(rowWidth, len(headerStr))
+            headerStr = headerStr.rstrip()
+            rowWidth = max(rowWidth, len(headerStr) + 4)
+            headerStr = "  " + headerStr
             headerList.append(headerStr)
             headerStr = ""
             
@@ -332,6 +334,9 @@ def MainLoop():
                 padding = " " * (paddingWidth - len(coins))
                 headerStr += coins + padding
             
+            headerStr = "  " + headerStr
+            headerStr = headerStr.rstrip()
+            rowWidth = max(rowWidth, len(headerStr))
             rowWidth = max(rowWidth, len(headerStr))
             headerList.append(headerStr)
             
@@ -412,10 +417,18 @@ def MainLoop():
                 target = ChooseTarget()
 
             try:
-                ClearScreen()
-                print("%s is playing %s" % (player.name, AvailableActions[move].name), end = '')
+                header = []
+                headerStr = "%s is playing %s" % (player.name, AvailableActions[move].name)
+                headerLen = len(headerStr) + 4
+                headerStr = headerStr.center(headerLen)
+                header.append(headerStr)
+                
                 if not target is None:
-                    print(" (target: %s)" % (target.name))
+                    headerStr = " (target: %s)" % (target.name)
+                    headerStr += " " * (headerLen - len(headerStr))
+                    header.append(headerStr)
+                
+                ClearScreen("|\n|".join(header), headerLen)
                 
                 print("")
                 

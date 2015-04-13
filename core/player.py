@@ -1,6 +1,7 @@
-from action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins, ForceCoupCoins
-from game import GameState
 import random
+
+from core.action import Action, Coup, DeadPlayer, ActionNotAllowed, TargetRequired, NotEnoughCoins, ForceCoupCoins
+from core.game import GameState
 
 class Player():
     def __init__(self):

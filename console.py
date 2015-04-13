@@ -1,6 +1,6 @@
-import action
-from player import Player
-from game   import GameState
+import core.action as action
+from core.player import Player
+from core.game   import GameState
 
 import random
 import os

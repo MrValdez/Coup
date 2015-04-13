@@ -150,8 +150,7 @@ class ConsolePlayer(Player):
             return [card1, card2]
 
 def ClearScreen(headerMessage, headerSize = 10):
-    # todo: make this crossplatform
-    os.system("cls")
+    os.system('cls' if os.name == 'nt' else 'clear')    # http://stackoverflow.com/a/2084628/1599
     
     # http://stackoverflow.com/questions/17254780/printing-extended-ascii-characters-in-python-3-in-both-windows-and-linux
     dic = {

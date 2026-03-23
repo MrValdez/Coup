@@ -843,6 +843,24 @@ class CallBluff(unittest.TestCase):
 
         self.assertEqual(len(player2.influence), 0)
 
+    def test_Assassin_FailedAssasinBluff(self):
+        """ Important rule test: A player bluffs assassin. Opponent calls bluff. The active player should lose a card but should not use up their coins. """
+        player = self.player
+        player.influence = [action.Income, action.Income]
+        player.coins = 3
+
+        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+
+        playedAction = action.Assassin
+        status, response = player.play(playedAction, player_CallBluff)
+        self.assertEqual(player.coins, 3)
+
+        self.assertEqual(len(player.influence), 1)
+        self.assertFalse(status)
+
+        expectedMessage = "Bluffing %s failed for %s" % (playedAction.name, player.name)
+        self.assertEqual(response, expectedMessage)
+
 
 if __name__ == "__main__":
     unittest.main()

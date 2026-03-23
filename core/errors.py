@@ -13,8 +13,8 @@ class DeadPlayer(Exception):       pass
 class NotEnoughCoins(Exception):
     def __init__(self, coinsNeeded):
         self.coinsNeeded = coinsNeeded
-        
-class InvalidTarget(Exception):    
+
+class InvalidTarget(Exception):
     def __init__(self, message):
         self.message = message
     def __str__(self):

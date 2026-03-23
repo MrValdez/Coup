@@ -7,7 +7,7 @@
 #  4. Allow other players to challenge move
 #  5. Play card's effect if no challenge or blocking fails
 
-#  Challenge Check: 
+#  Challenge Check:
 #    1. If challenge succeeds, kill the player's one card
 #    2. Check if player is dead
 #    3. If challenge fails, kill challenger's one card

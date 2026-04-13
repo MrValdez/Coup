@@ -6,4 +6,4 @@ More information on the game can be found here: http://boardgamegeek.com/boardga
 For this clone, I focused on making unit test for the game mechanics. I know this game very well and I've seen all of the possible interactions in the base game.
 
 
-To play, type "python console.py" in your console.
+To play, type "python -m pycoup" in your console/terminal.

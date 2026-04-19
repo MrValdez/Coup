@@ -412,12 +412,12 @@ class Players(unittest.TestCase):
                 self.Order.append(self.position)
                 return None
 
-        player1 = PlayerNumber(1, Order)
-        player2 = PlayerNumber(2, Order)
+        _ = PlayerNumber(1, Order)
+        _ = PlayerNumber(2, Order)
         player3 = PlayerNumber(3, Order)
         player4 = PlayerNumber(4, Order)
-        player5 = PlayerNumber(5, Order)
-        player6 = PlayerNumber(6, Order)
+        _ = PlayerNumber(5, Order)
+        _ = PlayerNumber(6, Order)
 
         status, response = player4.play(action.Captain, player3)
         self.assertTrue(status, response)
@@ -444,12 +444,12 @@ class Players(unittest.TestCase):
                 self.Order.append(self.position)
                 return False
 
-        player1 = PlayerNumber(1, Order)
-        player2 = PlayerNumber(2, Order)
+        _ = PlayerNumber(1, Order)
+        _ = PlayerNumber(2, Order)
         player3 = PlayerNumber(3, Order)
         player4 = PlayerNumber(4, Order)
-        player5 = PlayerNumber(5, Order)
-        player6 = PlayerNumber(6, Order)
+        _ = PlayerNumber(5, Order)
+        _ = PlayerNumber(6, Order)
 
         status, response = player4.play(action.Captain, player3)
         self.assertTrue(status, response)
@@ -535,10 +535,10 @@ class BlockingSystem(unittest.TestCase):
     def test_ValidBlockAction_Fail(self):
         """Only actions that can block active player's action can be used. This test checks that if an invalid block is used, nothing happens."""
         player = self.player
-        player_blocker = BlockingSystem.AlwaysBlockingPlayer(action.ForeignAid)
+        _ = BlockingSystem.AlwaysBlockingPlayer(action.ForeignAid)
 
         self.assertEqual(player.coins, 2)
-        status, response = player.play(action.ForeignAid)
+        status, _ = player.play(action.ForeignAid)
         self.assertEqual(player.coins, 4)
         self.assertTrue(status)
 
@@ -746,7 +746,7 @@ class ActionBlocking(unittest.TestCase):
         """Test for players blocking foriegn aid"""
         # todo: use a mock object to create a mock action that is blockable
         player = self.player
-        player_blocker = ActionBlocking.AlwaysBlockingPlayer(action.Duke)
+        _ = ActionBlocking.AlwaysBlockingPlayer(action.Duke)
 
         self.assertEqual(player.coins, 2)
         status, response = player.play(action.ForeignAid)
@@ -807,11 +807,11 @@ class CallBluff(unittest.TestCase):
         player = self.player
         player.giveCards(action.ForeignAid)  # todo: add mock object for action
 
-        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        _ = CallBluff.AlwaysCallingPlayer()
 
         playedAction = action.Income
         self.assertEqual(player.coins, 2)
-        status, response = player.play(playedAction)
+        _, _ = player.play(playedAction)
         self.assertEqual(player.coins, 3)
 
     def test_CallActivePlayerBluff_Success(self):
@@ -838,11 +838,11 @@ class CallBluff(unittest.TestCase):
         player.giveCards(action.ForeignAid)
         self.assertEqual(len(player.influence), 2)
 
-        player_CallBluff = CallBluff.AlwaysCallingPlayer()
+        _ = CallBluff.AlwaysCallingPlayer()
 
         playedAction = action.ForeignAid
         self.assertEqual(player.coins, 2)
-        status, response = player.play(playedAction)
+        status, _ = player.play(playedAction)
         self.assertEqual(player.coins, 4)
 
         self.assertEqual(len(player.influence), 2)

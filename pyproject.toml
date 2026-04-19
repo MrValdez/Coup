@@ -21,3 +21,8 @@ license-files = ["LICENSE"]
 [project.urls]
 Homepage = "https://github.com/MrValdez/Coup"
 Issues = "https://github.com/MrValdez/Coup/issues"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]

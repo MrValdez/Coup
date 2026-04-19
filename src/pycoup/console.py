@@ -1,9 +1,9 @@
 import os
 import random
 
-import core.action as action
-from core.game import GameState
-from core.player import Player
+import src.pycoup.core.action as action
+from src.pycoup.core.game import GameState
+from src.pycoup.core.player import Player
 
 # Freemode allows the game to allow for any cards to be played
 FreeMode = True
@@ -17,11 +17,12 @@ CurrentPlayer = 0
 
 AvailableActions = []
 
+
 class ConsolePlayer(Player):
-    ShowBlockOptions = True         # global variable to show possible options for blocking. set to True every turn
+    ShowBlockOptions = True  # global variable to show possible options for blocking. set to True every turn
 
     def confirmCall(self, activePlayer, action):
-        """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
+        """return True if player confirms call for bluff on active player's action. returns False if player allows action."""
         if len(PlayersAlive) > 2:
             longestName = [len(player.name) for player in PlayersAlive]
             longestName = max(longestName)
@@ -29,20 +30,26 @@ class ConsolePlayer(Player):
         else:
             name = self.name + ","
 
-        choice = input ("%s do you think %s's %s is a bluff?\n Do you want to call (Y/N)? " % (name, activePlayer.name, action.name))
+        choice = input(
+            "%s do you think %s's %s is a bluff?\n Do you want to call (Y/N)? "
+            % (name, activePlayer.name, action.name)
+        )
         choice = choice.upper()
 
-        if not choice.strip() in ('Y', 'N', ''):
-            print ("\n Type Y to call bluff. \n Type N or press enter to allow %s's %s.\n" % (activePlayer.name, action.name))
+        if not choice.strip() in ("Y", "N", ""):
+            print(
+                "\n Type Y to call bluff. \n Type N or press enter to allow %s's %s.\n"
+                % (activePlayer.name, action.name)
+            )
             return self.confirmCall(activePlayer, action)
 
-        if choice == 'Y':
+        if choice == "Y":
             return True
 
         return False
 
     def confirmBlock(self, activePlayer, opponentAction):
-        """ returns action used by player to blocks action. return None if player allows action. """
+        """returns action used by player to blocks action. return None if player allows action."""
         cardBlockers = []
 
         for card in GameState.CardsAvailable:
@@ -54,7 +61,10 @@ class ConsolePlayer(Player):
         if ConsolePlayer.ShowBlockOptions:
             ConsolePlayer.ShowBlockOptions = False
 
-            print ("\n%s's %s can be blocked with the following cards:" % (activePlayer.name, opponentAction.name))
+            print(
+                "\n%s's %s can be blocked with the following cards:"
+                % (activePlayer.name, opponentAction.name)
+            )
             for i, card in enumerate(cardBlockers):
                 print(" %i: %s" % (i + 1, card.name))
             print(" %i: (Do not block)\n" % (totalBlockers))
@@ -66,21 +76,30 @@ class ConsolePlayer(Player):
         else:
             name = self.name + ","
 
-        choice = input("%s do you wish to block %s (1-%i)? " % (name, opponentAction.name, totalBlockers))
+        choice = input(
+            "%s do you wish to block %s (1-%i)? "
+            % (name, opponentAction.name, totalBlockers)
+        )
         choice = choice.strip()
         if choice == "":
-            choice = str(totalBlockers)      # do not block
+            choice = str(totalBlockers)  # do not block
 
         if not choice.isnumeric():
-            print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
+            print(
+                " Select a number between 1-%i. Press enter to allow %s's %s."
+                % (totalBlockers, activePlayer.name, opponentAction.name)
+            )
             return self.confirmBlock(activePlayer, opponentAction)
         choice = int(choice) - 1
 
         if choice == len(cardBlockers):
-            return None         # player decides not to block
+            return None  # player decides not to block
 
         if not (choice >= 0 and choice < len(cardBlockers)):
-            print (" Select a number between 1-%i. Press enter to allow %s's %s." % (totalBlockers, activePlayer.name, opponentAction.name))
+            print(
+                " Select a number between 1-%i. Press enter to allow %s's %s."
+                % (totalBlockers, activePlayer.name, opponentAction.name)
+            )
             return self.confirmBlock(activePlayer, opponentAction)
 
         block = cardBlockers[choice - 1]
@@ -89,41 +108,43 @@ class ConsolePlayer(Player):
         return block
 
     def selectInfluenceToDie(self):
-        """ select an influence to die. returns the value from the influence list. """
-        print ("\n%s has lost an influence!" % (self.name))
+        """select an influence to die. returns the value from the influence list."""
+        print("\n%s has lost an influence!" % (self.name))
 
         if len(self.influence) == 1:
-            print ("%s will lose their last card, %s" % (self.name, self.influence[0].name))
+            print(
+                "%s will lose their last card, %s" % (self.name, self.influence[0].name)
+            )
             return self.influence[0]
 
-        print ("%s, select influence to lose:" % (self.name))
+        print("%s, select influence to lose:" % (self.name))
         for i, card in enumerate(self.influence):
-            print (" %i: %s" % (i + 1, card.name))
+            print(" %i: %s" % (i + 1, card.name))
         choice = input("> ")
         if not choice.isnumeric():
-            print ("Invalid choice, try again\n")
+            print("Invalid choice, try again\n")
             return self.selectInfluenceToDie()
         choice = int(choice)
         if not (choice == 1 or choice == 2):
-            print ("Invalid choice, try again\n")
+            print("Invalid choice, try again\n")
             return self.selectInfluenceToDie()
         if choice > len(self.influence):
-            print ("Invalid choice, try again\n")
+            print("Invalid choice, try again\n")
             return self.selectInfluenceToDie()
 
         return self.influence[choice - 1]
 
     def selectAmbassadorInfluence(self, choices, influenceRemaining):
-        """ returns one or two cards from the choices. """
+        """returns one or two cards from the choices."""
         finalChoices = []
 
         def askChoice(choices, inputMessage):
             print("")
             for i, choice in enumerate(choices):
-                print (" %i: %s" % (i + 1, choice.name))
+                print(" %i: %s" % (i + 1, choice.name))
 
             print("")
-            card = input (inputMessage)
+            card = input(inputMessage)
 
             if not card.isnumeric():
                 return askChoice(choices, inputMessage)
@@ -142,32 +163,36 @@ class ConsolePlayer(Player):
         card1 = askChoice(choices, "Select the first card to take> ")
         choices.remove(card1)
 
-        if (influenceRemaining == 1):
+        if influenceRemaining == 1:
             return [card1]
         else:
             print("")
             card2 = askChoice(choices, "Select the second card to take>")
             return [card1, card2]
 
-def ClearScreen(headerMessage, headerSize = 10):
-    os.system('cls' if os.name == 'nt' else 'clear')    # http://stackoverflow.com/a/2084628/1599
+
+def ClearScreen(headerMessage, headerSize=10):
+    os.system(
+        "cls" if os.name == "nt" else "clear"
+    )  # http://stackoverflow.com/a/2084628/1599
 
     # http://stackoverflow.com/questions/17254780/printing-extended-ascii-characters-in-python-3-in-both-windows-and-linux
     dic = {
-    '\\' : b'\xe2\x95\x9a',
-    '-'  : b'\xe2\x95\x90',
-    '/'  : b'\xe2\x95\x9d',
-    '|'  : b'\xe2\x95\x91',
-    '+'  : b'\xe2\x95\x94',
-    '%'  : b'\xe2\x95\x97',
+        "\\": b"\xe2\x95\x9a",
+        "-": b"\xe2\x95\x90",
+        "/": b"\xe2\x95\x9d",
+        "|": b"\xe2\x95\x91",
+        "+": b"\xe2\x95\x94",
+        "%": b"\xe2\x95\x97",
     }
 
     def decode(x):
-        return (''.join(dic.get(i, i.encode('utf-8')).decode('utf-8') for i in x))
+        return "".join(dic.get(i, i.encode("utf-8")).decode("utf-8") for i in x)
 
-    print(decode("+%s%%" % ('-' * headerSize)))
-    print(decode("|%s|"  % (headerMessage.center(headerSize))))
-    print(decode("\\%s/" % ('-' * headerSize)))
+    print(decode("+%s%%" % ("-" * headerSize)))
+    print(decode("|%s|" % (headerMessage.center(headerSize))))
+    print(decode("\\%s/" % ("-" * headerSize)))
+
 
 def PrintTurnOrder(currentPlayerShown):
     header = [" Turn order", ""]
@@ -188,7 +213,7 @@ def PrintTurnOrder(currentPlayerShown):
 
 
 def PrintDeckList():
-    print ("There are %i cards in the Court Deck" % (len(GameState.Deck)))
+    print("There are %i cards in the Court Deck" % (len(GameState.Deck)))
 
     if FreeMode:
         # calculate what cards can be in the court deck
@@ -200,7 +225,9 @@ def PrintDeckList():
                 except ValueError:
                     # one of the players received more than 3 copies of a card.
                     # add a "fake card" into the deck as indicator
-                    class FakeCard(action.Action):  pass
+                    class FakeCard(action.Action):
+                        pass
+
                     FakeCard.name = "%s (Extra)" % (card.name)
                     deck.append(FakeCard)
         for card in GameState.RevealedCards:
@@ -213,23 +240,26 @@ def PrintDeckList():
         for card in deck:
             print(" ", card)
 
+
 def PrintRevealedCards():
     size = len(GameState.RevealedCards)
     if size == 0:
         return
 
-    print ("There are %i cards that has been revealed:" % (size))
+    print("There are %i cards that has been revealed:" % (size))
 
     reveals = [card.name for card in GameState.RevealedCards]
     reveals.sort()
     for card in reveals:
         print("   ", card)
 
+
 def PrintActions():
     for i, action in enumerate(AvailableActions):
-        if action.name != "Contessa":   # ignore Contessa as a possible action.
-            print (" %i: %s" % (i + 1, action.name))
-    print (" X: Exit the game")
+        if action.name != "Contessa":  # ignore Contessa as a possible action.
+            print(" %i: %s" % (i + 1, action.name))
+    print(" X: Exit the game")
+
 
 def SelectCards(message, twoCards):
     print(message)
@@ -255,6 +285,7 @@ def SelectCards(message, twoCards):
         card2 = InputCard("Card #2: ")
         return [card1, card2]
 
+
 def SetupActions():
     global AvailableActions
     for action in GameState.CommonActions:
@@ -262,18 +293,21 @@ def SetupActions():
     for action in GameState.CardsAvailable:
         AvailableActions.append(action)
 
+
 def SetupRNG():
-    """ This setups the RNG to have the cards come from the user instead """
+    """This setups the RNG to have the cards come from the user instead"""
     if not FreeMode:
         return
 
-    def randomShuffle(deck):    pass            # does not shuffle
+    def randomShuffle(deck):
+        pass  # does not shuffle
+
     def randomSelector(deck):
         message = "Select the card the player received: "
         cards = SelectCards(message, False)
         return cards[0]
 
-    GameState.randomShuffle  = randomShuffle
+    GameState.randomShuffle = randomShuffle
     GameState.randomSelector = randomSelector
 
 
@@ -296,12 +330,15 @@ def Setup():
         return PlayerCount
 
     PlayerCount = GetNumberOfPlayers()
-    #PlayerCount = 2        # for testing purposes
+    # PlayerCount = 2        # for testing purposes
 
     def CreatePlayer(Number):
         player = ConsolePlayer()
 
-        player.name = input("Player #%i: What is your name (Leave blank for a random name)? " % (Number + 1))
+        player.name = input(
+            "Player #%i: What is your name (Leave blank for a random name)? "
+            % (Number + 1)
+        )
 
         if player.name.strip() == "":
             player.name = random.choice(defaultNames)
@@ -312,7 +349,10 @@ def Setup():
             message = "Select %s's cards" % (player.name)
             player.influence = SelectCards(message, True)
 
-            print(" Player %s is holding: %s and %s\n" % (player.name, player.influence[0].name, player.influence[1].name))
+            print(
+                " Player %s is holding: %s and %s\n"
+                % (player.name, player.influence[0].name, player.influence[1].name)
+            )
 
         return player
 
@@ -325,6 +365,7 @@ def Setup():
 
     global PlayersAlive
     PlayersAlive = [player for player in Players if player.alive]
+
 
 def MainLoop():
     # Infinite loop until one player remains
@@ -345,7 +386,7 @@ def MainLoop():
             for playerInfo in PlayerList:
                 name = playerInfo.name
                 if len(name) > paddingWidth - 4:
-                    name = name[:paddingWidth - 4] + "... "
+                    name = name[: paddingWidth - 4] + "... "
 
                 padding = " " * (paddingWidth - len(name))
                 headerStr += name + padding
@@ -389,16 +430,17 @@ def MainLoop():
         def Cleanup():
             global CurrentPlayer
             CurrentPlayer += 1
-            if CurrentPlayer >= len(Players): CurrentPlayer = 0
+            if CurrentPlayer >= len(Players):
+                CurrentPlayer = 0
 
             global PlayersAlive
             PlayersAlive = [player for player in Players if player.alive]
 
         def ChooseAction():
-            move = input ("Action> ")
+            move = input("Action> ")
             if not move.isnumeric():
                 if move.upper() == "X":
-                    confirm = input ("\nAre you sure you want to exit (Y/N)? ")
+                    confirm = input("\nAre you sure you want to exit (Y/N)? ")
                     if confirm.upper() != "Y":
                         ChooseAction()
                         return
@@ -428,7 +470,7 @@ def MainLoop():
                 print()
                 for i, iterPlayer in enumerate(PossibleTargets):
                     print(" %i: %s" % (i + 1, iterPlayer.name))
-                target = input ("Choose a target> ")
+                target = input("Choose a target> ")
 
                 if not target.isnumeric():
                     return ChooseTarget()
@@ -439,12 +481,25 @@ def MainLoop():
                 return PossibleTargets[target]
 
             if player.coins < AvailableActions[move].coinsNeeded:
-                print(" You need %i coins to play %s. You only have %i coins." % (AvailableActions[move].coinsNeeded, AvailableActions[move].name, player.coins))
+                print(
+                    " You need %i coins to play %s. You only have %i coins."
+                    % (
+                        AvailableActions[move].coinsNeeded,
+                        AvailableActions[move].name,
+                        player.coins,
+                    )
+                )
                 ChooseAction()
                 return
 
-            if player.coins >= action.ForceCoupCoins and AvailableActions[move].name != "Coup":
-                print("Player has %i coins. Forced Coup is the only allowed action" % (player.coins))
+            if (
+                player.coins >= action.ForceCoupCoins
+                and AvailableActions[move].name != "Coup"
+            ):
+                print(
+                    "Player has %i coins. Forced Coup is the only allowed action"
+                    % (player.coins)
+                )
                 ChooseAction()
                 return
 
@@ -454,7 +509,10 @@ def MainLoop():
 
             try:
                 header = []
-                headerStr = "%s is playing %s" % (player.name, AvailableActions[move].name)
+                headerStr = "%s is playing %s" % (
+                    player.name,
+                    AvailableActions[move].name,
+                )
                 headerLen = len(headerStr) + 4
                 headerStr = headerStr.center(headerLen)
                 header.append(headerStr)
@@ -474,7 +532,10 @@ def MainLoop():
                 ChooseAction()
                 return
             except action.NotEnoughCoins as exc:
-                print(" You need %i coins to play %s. You only have %i coins." % (exc.coinsNeeded, AvailableActions[move].name, player.coins))
+                print(
+                    " You need %i coins to play %s. You only have %i coins."
+                    % (exc.coinsNeeded, AvailableActions[move].name, player.coins)
+                )
                 ChooseAction()
                 return
             except action.BlockOnly:
@@ -488,7 +549,7 @@ def MainLoop():
                 return
 
             if status == False:
-                print (response)
+                print(response)
 
         if player.alive:
             PrintInfo()
@@ -497,10 +558,15 @@ def MainLoop():
             ChooseAction()
 
         Cleanup()
-        if GameIsRunning: input("\n%s, press enter key to take your turn..." % Players[CurrentPlayer].name)
+        if GameIsRunning:
+            input(
+                "\n%s, press enter key to take your turn..."
+                % Players[CurrentPlayer].name
+            )
 
     if len(PlayersAlive) == 1:
         ClearScreen("The winner is %s" % (PlayersAlive[0].name), 79)
+
 
 def main():
     ClearScreen("Game Setup", 50)
@@ -518,6 +584,7 @@ def main():
     ClearScreen("Game start", 14)
     input("\n%s, press enter key to start the game..." % (Players[0].name))
     MainLoop()
+
 
 if __name__ == "__main__":
     main()

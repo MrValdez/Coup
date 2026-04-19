@@ -11,10 +11,11 @@
 # Hardcoded value
 #   ForceCoupCoins
 
-from core.errors import *
-from core.game import GameState
+from src.pycoup.core.errors import *
+from src.pycoup.core.game import GameState
 
 ForceCoupCoins = 10
+
 
 class Action:
     name = ""
@@ -23,33 +24,36 @@ class Action:
     hasTarget = False
     coinsNeeded = 0
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         """
-         should be overrriden by child classes
-         returns (status, response) where
-           status:     True/False if action is successful or not
-           response:   String explaining status. Usually reserved for explanation of why an action failed.
-         Example:
-            return True, "Success"
-            return False, "Failed because it was blocked"
+        should be overrriden by child classes
+        returns (status, response) where
+          status:     True/False if action is successful or not
+          response:   String explaining status. Usually reserved for explanation of why an action failed.
+        Example:
+           return True, "Success"
+           return False, "Failed because it was blocked"
         """
         return False, None
+
 
 class Income(Action):
     name = "Income"
     description = "Gain 1 gold"
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         player.coins += 1
         return True, "Success"
+
 
 class ForeignAid(Action):
     name = "Foreign Aid"
     description = "Gain 2 gold"
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         player.coins += 2
         return True, "Success"
+
 
 class Coup(Action):
     name = "Coup"
@@ -57,7 +61,7 @@ class Coup(Action):
     hasTarget = True
     coinsNeeded = 7
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         if player.coins < self.coinsNeeded:
             raise NotEnoughCoins(self.coinsNeeded)
 
@@ -72,14 +76,16 @@ class Coup(Action):
         target.loseInfluence()
         return True, "Success"
 
+
 class Duke(Action):
     name = "Duke"
     description = "Gain 3 gold. Blocks Foreign Aid."
     blocks = ["Foreign Aid"]
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         player.coins += 3
         return True, "Success"
+
 
 class Captain(Action):
     name = "Captain"
@@ -87,7 +93,7 @@ class Captain(Action):
     blocks = ["Captain"]
     hasTarget = True
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         if target == None:
             raise TargetRequired
 
@@ -98,18 +104,21 @@ class Captain(Action):
             steal = 1
 
         target.coins -= steal
-        if target.coins < 0: target.coins = 0
+        if target.coins < 0:
+            target.coins = 0
         player.coins += steal
 
         return True, "Success"
+
 
 class Contessa(Action):
     name = "Contessa"
     description = "Blocks Assasination."
     blocks = ["Assassin"]
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         raise BlockOnly
+
 
 class Assassin(Action):
     name = "Assassin"
@@ -118,7 +127,7 @@ class Assassin(Action):
     hasTarget = True
     coinsNeeded = 3
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         if player.coins < self.coinsNeeded:
             raise NotEnoughCoins(self.coinsNeeded)
         if target == None:
@@ -129,12 +138,15 @@ class Assassin(Action):
 
         return True, "Success"
 
+
 class Ambassador(Action):
     name = "Ambassador"
-    description = "Exchange your influence with 2 cards from the Court Deck. Blocks Steal."
+    description = (
+        "Exchange your influence with 2 cards from the Court Deck. Blocks Steal."
+    )
     blocks = ["Captain"]
 
-    def play(self, player, target = None):
+    def play(self, player, target=None):
         influenceRemaining = len(player.influence)
         choices = list(player.influence)
 
@@ -142,7 +154,9 @@ class Ambassador(Action):
         choices.append(deckCards[0])
         choices.append(deckCards[1])
 
-        newInfluence = player.selectAmbassadorInfluence(list(choices), influenceRemaining)
+        newInfluence = player.selectAmbassadorInfluence(
+            list(choices), influenceRemaining
+        )
         if type(newInfluence) != list:
             newInfluence = [newInfluence]
 
@@ -155,7 +169,7 @@ class Ambassador(Action):
             ReturnCards()
             raise InvalidTarget("Wrong number of cards given")
 
-        choicesCopy = list(choices) # this allow us to test for card duplicates
+        choicesCopy = list(choices)  # this allow us to test for card duplicates
         for card in newInfluence:
             if not card in choicesCopy:
                 # something is wrong. The player sent a card choice that is not part of the original choices.

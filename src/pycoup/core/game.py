@@ -1,15 +1,22 @@
 import random
 
-from core.errors import MajorError
+from src.pycoup.core.errors import MajorError
 
 
 class GameState:
     def reset(self):
         self.PlayerList = []
 
-        from . import action  #todo: figure out the correct way to do this.
+        from . import action  # todo: figure out the correct way to do this.
+
         self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
-        self.CardsAvailable = [action.Duke, action.Captain, action.Assassin, action.Ambassador, action.Contessa]
+        self.CardsAvailable = [
+            action.Duke,
+            action.Captain,
+            action.Assassin,
+            action.Ambassador,
+            action.Contessa,
+        ]
         self.Deck = self.CardsAvailable * 3
         random.shuffle(self.Deck)
 
@@ -78,7 +85,8 @@ class GameState:
         self.randomShuffle(self.Deck)
 
     def DrawCard(self):
-        if not len(self.Deck): raise MajorError("There is no card in the court deck!")
+        if not len(self.Deck):
+            raise MajorError("There is no card in the court deck!")
 
         card = self.randomSelector(self.Deck)
         self.Deck.remove(card)
@@ -95,4 +103,5 @@ class GameState:
 
         return blockers
 
-GameState = GameState()     # global variable
+
+GameState = GameState()  # global variable

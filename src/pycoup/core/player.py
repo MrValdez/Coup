@@ -1,6 +1,6 @@
 import random
 
-from core.action import (
+from src.pycoup.core.action import (
     Action,
     ActionNotAllowed,
     Coup,
@@ -9,10 +9,10 @@ from core.action import (
     NotEnoughCoins,
     TargetRequired,
 )
-from core.game import GameState
+from src.pycoup.core.game import GameState
 
 
-class Player():
+class Player:
     def __init__(self):
         self.reset()
 
@@ -25,11 +25,11 @@ class Player():
         card1 = GameState.DrawCard()
         card2 = GameState.DrawCard()
         self.influence = [card1, card2]
-        #self.influence = [Action, Action]  # for testing purposes
+        # self.influence = [Action, Action]  # for testing purposes
 
         GameState.PlayerList.append(self)
 
-    def giveCards(self, card1, card2 = None):
+    def giveCards(self, card1, card2=None):
         """
         Give the player one or two cards.
          If player cannot receive cards, return False.
@@ -51,7 +51,7 @@ class Player():
 
         return True
 
-    def play(self, action, target = None):
+    def play(self, action, target=None):
         """
         1. Check if player is alive. If not, throw exception.
         2. Check if player has at least 12 coins. If they do, throw exception unless coup is played.
@@ -74,12 +74,17 @@ class Player():
             raise NotEnoughCoins(action.coinsNeeded)
 
         if self.coins >= ForceCoupCoins and action != Coup:
-            raise ActionNotAllowed("Player has %i coins. Forced Coup is the only allowed action" % (self.coins))
+            raise ActionNotAllowed(
+                "Player has %i coins. Forced Coup is the only allowed action"
+                % (self.coins)
+            )
 
         # Step 3
         callingPlayer = None
 
-        if action in GameState.CardsAvailable:      # should only call bluff for cards, not common actions
+        if (
+            action in GameState.CardsAvailable
+        ):  # should only call bluff for cards, not common actions
             callingPlayer = GameState.requestCallForBluffs(self, action, target)
 
         if callingPlayer != None:
@@ -104,14 +109,20 @@ class Player():
 
         # should only call bluff for cards, not common actions
         if len(GameState.getBlockingActions(action)):
-            blockingPlayer, blockingAction = GameState.requestBlocks(self, action, target)
+            blockingPlayer, blockingAction = GameState.requestBlocks(
+                self, action, target
+            )
 
         if blockingPlayer != None:
             # Step 3.a
             if self.confirmCall(blockingPlayer, blockingAction):
                 if blockingAction in blockingPlayer.influence:
                     self.loseInfluence()
-                    message = "Player %s has %s. Player %s loses influence." % (blockingPlayer.name, blockingAction.name, self.name)
+                    message = "Player %s has %s. Player %s loses influence." % (
+                        blockingPlayer.name,
+                        blockingAction.name,
+                        self.name,
+                    )
                     blockingPlayer.changeCard(blockingAction)
                     return False, message
                 else:
@@ -134,22 +145,24 @@ class Player():
         GameState.RevealedCards.append(loses)
 
     def confirmCall(self, activePlayer, action):
-        """ return True if player confirms call for bluff on active player's action. returns False if player allows action. """
+        """return True if player confirms call for bluff on active player's action. returns False if player allows action."""
         # todo: raise notImplemented. should be overriden
         return False
 
     def confirmBlock(self, activePlayer, opponentAction):
-        """ returns action used by player to blocks action. return None if player allows action. """
+        """returns action used by player to blocks action. return None if player allows action."""
         # todo: raise notImplemented. should be overriden
         return None
 
     def selectInfluenceToDie(self):
-        """ select an influence to die. returns the value from the influence list. """
+        """select an influence to die. returns the value from the influence list."""
         # todo: raise notImplemented. should be overriden by the input class
-        return random.choice(self.influence)  # todo: change from random choice to player choice
+        return random.choice(
+            self.influence
+        )  # todo: change from random choice to player choice
 
     def selectAmbassadorInfluence(self, choices, influenceRemaining):
-        """ returns one or two cards from the choices. """
+        """returns one or two cards from the choices."""
         # todo: raise notImplemented. should be overriden by the input class
 
         selected = []
@@ -166,7 +179,9 @@ class Player():
         """
         if not card in self.influence:
             # todo: create a Coup-specific exception
-            raise BaseException("%s is not found in player's influence. Something went wrong" % card)
+            raise BaseException(
+                "%s is not found in player's influence. Something went wrong" % card
+            )
 
         self.influence.remove(card)
         GameState.AddToDeck(card)

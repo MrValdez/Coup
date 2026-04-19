@@ -1,8 +1,9 @@
 import unittest
 
 import core.action as action
+from core.game import GameState
 from core.player import Player
-from core.game   import GameState
+
 
 class Actions(unittest.TestCase):
     def setUp(self):

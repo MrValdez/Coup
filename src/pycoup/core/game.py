@@ -2,11 +2,12 @@ import random
 
 from core.errors import MajorError
 
+
 class GameState:
     def reset(self):
         self.PlayerList = []
 
-        from . import action            #todo: figure out the correct way to do this.
+        from . import action  #todo: figure out the correct way to do this.
         self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
         self.CardsAvailable = [action.Duke, action.Captain, action.Assassin, action.Ambassador, action.Contessa]
         self.Deck = self.CardsAvailable * 3

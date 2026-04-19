@@ -1,9 +1,9 @@
-import core.action as action
-from core.player import Player
-from core.game   import GameState
-
-import random
 import os
+import random
+
+import core.action as action
+from core.game import GameState
+from core.player import Player
 
 # Freemode allows the game to allow for any cards to be played
 FreeMode = True

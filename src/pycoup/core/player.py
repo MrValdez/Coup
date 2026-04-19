@@ -1,14 +1,10 @@
 import random
 
 from src.pycoup.core.action import (
-    Action,
-    ActionNotAllowed,
     Coup,
-    DeadPlayer,
     ForceCoupCoins,
-    NotEnoughCoins,
-    TargetRequired,
 )
+from src.pycoup.core import errors
 from src.pycoup.core.game import GameState
 
 
@@ -64,17 +60,17 @@ class Player:
                    If card is the action played, remove influence from player.
                    Else, remove influence from calling player
         """
-        if not self.alive or (target != None and not target.alive):
-            raise DeadPlayer
+        if not self.alive or (target is not None and not target.alive):
+            raise errors.DeadPlayer
 
         if target == self:
-            raise TargetRequired
+            raise errors.TargetRequired
 
         if self.coins < action.coinsNeeded:
-            raise NotEnoughCoins(action.coinsNeeded)
+            raise errors.NotEnoughCoins(action.coinsNeeded)
 
         if self.coins >= ForceCoupCoins and action != Coup:
-            raise ActionNotAllowed(
+            raise errors.ActionNotAllowed(
                 "Player has %i coins. Forced Coup is the only allowed action"
                 % (self.coins)
             )
@@ -87,7 +83,7 @@ class Player:
         ):  # should only call bluff for cards, not common actions
             callingPlayer = GameState.requestCallForBluffs(self, action, target)
 
-        if callingPlayer != None:
+        if callingPlayer is not None:
             # step 4.a
             if action in self.influence:
                 # active player is telling the truth. Return the card back to the deck.
@@ -113,7 +109,7 @@ class Player:
                 self, action, target
             )
 
-        if blockingPlayer != None:
+        if blockingPlayer is not None:
             # Step 3.a
             if self.confirmCall(blockingPlayer, blockingAction):
                 if blockingAction in blockingPlayer.influence:
@@ -177,7 +173,7 @@ class Player:
         """
         change card to a new card from the player deck. This is called when a card is exposed after a call for bluff.
         """
-        if not card in self.influence:
+        if card not in self.influence:
             # todo: create a Coup-specific exception
             raise BaseException(
                 "%s is not found in player's influence. Something went wrong" % card

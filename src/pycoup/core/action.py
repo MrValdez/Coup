@@ -11,7 +11,7 @@
 # Hardcoded value
 #   ForceCoupCoins
 
-from src.pycoup.core.errors import *
+from src.pycoup.core import errors
 from src.pycoup.core.game import GameState
 
 ForceCoupCoins = 10
@@ -63,14 +63,14 @@ class Coup(Action):
 
     def play(self, player, target=None):
         if player.coins < self.coinsNeeded:
-            raise NotEnoughCoins(self.coinsNeeded)
+            raise errors.NotEnoughCoins(self.coinsNeeded)
 
         # target should be alive
-        if target == None:
-            raise TargetRequired
+        if target is None:
+            raise errors.TargetRequired
 
         if not target.alive:
-            raise InvalidTarget("Target is dead")
+            raise errors.InvalidTarget("Target is dead")
 
         player.coins -= 7
         target.loseInfluence()
@@ -94,8 +94,8 @@ class Captain(Action):
     hasTarget = True
 
     def play(self, player, target=None):
-        if target == None:
-            raise TargetRequired
+        if target is None:
+            raise errors.TargetRequired
 
         steal = 0
         if target.coins >= 2:
@@ -117,7 +117,7 @@ class Contessa(Action):
     blocks = ["Assassin"]
 
     def play(self, player, target=None):
-        raise BlockOnly
+        raise errors.BlockOnly
 
 
 class Assassin(Action):
@@ -129,9 +129,9 @@ class Assassin(Action):
 
     def play(self, player, target=None):
         if player.coins < self.coinsNeeded:
-            raise NotEnoughCoins(self.coinsNeeded)
-        if target == None:
-            raise TargetRequired
+            raise errors.NotEnoughCoins(self.coinsNeeded)
+        if target is None:
+            raise errors.TargetRequired
 
         player.coins -= 3
         target.loseInfluence()
@@ -157,7 +157,7 @@ class Ambassador(Action):
         newInfluence = player.selectAmbassadorInfluence(
             list(choices), influenceRemaining
         )
-        if type(newInfluence) != list:
+        if not isinstance(newInfluence, list):
             newInfluence = [newInfluence]
 
         def ReturnCards():
@@ -167,15 +167,15 @@ class Ambassador(Action):
         if len(newInfluence) != influenceRemaining:
             # There is a missing card. Try again.
             ReturnCards()
-            raise InvalidTarget("Wrong number of cards given")
+            raise errors.InvalidTarget("Wrong number of cards given")
 
         choicesCopy = list(choices)  # this allow us to test for card duplicates
         for card in newInfluence:
-            if not card in choicesCopy:
+            if card not in choicesCopy:
                 # something is wrong. The player sent a card choice that is not part of the original choices.
                 # try again.
                 ReturnCards()
-                raise InvalidTarget("Card given not part of valid choices")
+                raise errors.InvalidTarget("Card given not part of valid choices")
 
             choicesCopy.remove(card)
 

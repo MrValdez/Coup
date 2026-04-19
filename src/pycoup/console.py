@@ -1,7 +1,7 @@
 import os
 import random
 
-import src.pycoup.core.action as action
+from src.pycoup.core import action, errors
 from src.pycoup.core.game import GameState
 from src.pycoup.core.player import Player
 
@@ -36,7 +36,7 @@ class ConsolePlayer(Player):
         )
         choice = choice.upper()
 
-        if not choice.strip() in ("Y", "N", ""):
+        if choice.strip() not in ("Y", "N", ""):
             print(
                 "\n Type Y to call bluff. \n Type N or press enter to allow %s's %s.\n"
                 % (activePlayer.name, action.name)
@@ -136,7 +136,6 @@ class ConsolePlayer(Player):
 
     def selectAmbassadorInfluence(self, choices, influenceRemaining):
         """returns one or two cards from the choices."""
-        finalChoices = []
 
         def askChoice(choices, inputMessage):
             print("")
@@ -255,9 +254,9 @@ def PrintRevealedCards():
 
 
 def PrintActions():
-    for i, action in enumerate(AvailableActions):
-        if action.name != "Contessa":  # ignore Contessa as a possible action.
-            print(" %i: %s" % (i + 1, action.name))
+    for i, available_action in enumerate(AvailableActions):
+        if available_action.name != "Contessa":  # ignore Contessa as a possible action.
+            print(" %i: %s" % (i + 1, available_action.name))
     print(" X: Exit the game")
 
 
@@ -288,10 +287,10 @@ def SelectCards(message, twoCards):
 
 def SetupActions():
     global AvailableActions
-    for action in GameState.CommonActions:
-        AvailableActions.append(action)
-    for action in GameState.CardsAvailable:
-        AvailableActions.append(action)
+    for common_actions in GameState.CommonActions:
+        AvailableActions.append(common_actions)
+    for cards_available_action in GameState.CardsAvailable:
+        AvailableActions.append(cards_available_action)
 
 
 def SetupRNG():
@@ -517,7 +516,7 @@ def MainLoop():
                 headerStr = headerStr.center(headerLen)
                 header.append(headerStr)
 
-                if not target is None:
+                if target is not None:
                     headerStr = " (target: %s)" % (target.name)
                     headerStr += " " * (headerLen - len(headerStr))
                     header.append(headerStr)
@@ -531,7 +530,7 @@ def MainLoop():
                 print(e.message)
                 ChooseAction()
                 return
-            except action.NotEnoughCoins as exc:
+            except errors.NotEnoughCoins as exc:
                 print(
                     " You need %i coins to play %s. You only have %i coins."
                     % (exc.coinsNeeded, AvailableActions[move].name, player.coins)
@@ -548,7 +547,7 @@ def MainLoop():
                 ChooseAction()
                 return
 
-            if status == False:
+            if not status:
                 print(response)
 
         if player.alive:

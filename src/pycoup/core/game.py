@@ -37,7 +37,7 @@ class GameState:
         ActiveIndex = self.PlayerList.index(activePlayer)
         PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
 
-        if targetPlayer != None:
+        if targetPlayer is not None:
             TargetIndex = self.PlayerList.index(targetPlayer)
             PlayerList.remove(targetPlayer)
             PlayerList = [self.PlayerList[TargetIndex]] + PlayerList
@@ -48,9 +48,9 @@ class GameState:
 
             blockingAction = player.confirmBlock(activePlayer, action)
 
-            if blockingAction != None:
+            if blockingAction is not None:
                 # check that the block is valid
-                if not action.name in blockingAction.blocks:
+                if action.name not in blockingAction.blocks:
                     continue
 
                 return player, blockingAction
@@ -67,7 +67,7 @@ class GameState:
         ActiveIndex = self.PlayerList.index(activePlayer)
         PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
 
-        if targetPlayer != None:
+        if targetPlayer is not None:
             TargetIndex = self.PlayerList.index(targetPlayer)
             PlayerList.remove(targetPlayer)
             PlayerList = [self.PlayerList[TargetIndex]] + PlayerList

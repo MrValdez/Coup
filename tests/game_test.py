@@ -1,6 +1,6 @@
 import unittest
 
-import src.pycoup.core.action as action
+from src.pycoup.core import action, errors
 from src.pycoup.core.game import GameState
 from src.pycoup.core.player import Player
 
@@ -34,7 +34,7 @@ class Actions(unittest.TestCase):
 
         # test for no player having insufficient money
         player.coins = 6
-        with self.assertRaises(action.NotEnoughCoins) as exc:
+        with self.assertRaises(errors.NotEnoughCoins) as exc:
             status, response = player.play(action.Coup, player2)
         self.assertEqual(exc.exception.coinsNeeded, 7)
 
@@ -125,7 +125,7 @@ class Actions(unittest.TestCase):
         player.coins = 2
         self.assertEqual(len(player2.influence), 2)
 
-        with self.assertRaises(action.NotEnoughCoins) as exc:
+        with self.assertRaises(errors.NotEnoughCoins) as exc:
             status, response = player.play(action.Assassin, player2)
         self.assertEqual(exc.exception.coinsNeeded, 3)
         self.assertEqual(len(player2.influence), 2)

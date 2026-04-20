@@ -1,13 +1,20 @@
+from __future__ import annotations
+
 import random
+from typing import TYPE_CHECKING
 
 from src.pycoup.core.errors import MajorError
 
+if TYPE_CHECKING:
+    from . import action
+    from .player import Player
 
-class GameState:
+
+class CoupGame:
     def reset(self):
-        self.PlayerList = []
+        self.PlayerList: list[Player] = []
 
-        from . import action  # todo: figure out the correct way to do this.
+        from . import action
 
         self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
         self.CardsAvailable = [
@@ -20,14 +27,19 @@ class GameState:
         self.Deck = self.CardsAvailable * 3
         random.shuffle(self.Deck)
 
-        self.RevealedCards = []
+        self.RevealedCards: list[type[action.Action]] = []
 
         # separating these function allow outside modules (like the unit test) to change the behavior of
         # shuffling and selecting a card
         self.randomShuffle = random.shuffle
         self.randomSelector = random.choice
 
-    def requestBlocks(self, activePlayer, action, targetPlayer):
+    def requestBlocks(
+        self,
+        activePlayer: Player,
+        action: type[action.Action],
+        targetPlayer: Player | None,
+    ) -> tuple[Player | None, type[action.Action] | None]:
         """
         Ask each player if they want to block active player's action.
         Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206). However,
@@ -57,7 +69,12 @@ class GameState:
 
         return None, None
 
-    def requestCallForBluffs(self, activePlayer, action, targetPlayer):
+    def requestCallForBluffs(
+        self,
+        activePlayer: Player,
+        action: type[action.Action],
+        targetPlayer: Player | None,
+    ) -> Player | None:
         """
         Ask each player if they want to call active player's (possible) bluff.
         Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206). However,
@@ -79,12 +96,12 @@ class GameState:
                 return player
         return None
 
-    def AddToDeck(self, card):
+    def AddToDeck(self, card: type[action.Action]):
         # todo: add error handling
         self.Deck.append(card)
         self.randomShuffle(self.Deck)
 
-    def DrawCard(self):
+    def DrawCard(self) -> type[action.Action]:
         if not len(self.Deck):
             raise MajorError("There is no card in the court deck!")
 
@@ -92,16 +109,18 @@ class GameState:
         self.Deck.remove(card)
         return card
 
-    def getBlockingActions(self, action):
+    def getBlockingActions(
+        self, action: type[action.Action]
+    ) -> list[type[action.Action]]:
         """
         returns all the cards the block an action
         """
         blockers = []
-        for card in GameState.CardsAvailable:
+        for card in self.CardsAvailable:
             if action.name in card.blocks:
                 blockers.append(card)
 
         return blockers
 
 
-GameState = GameState()  # global variable
+game_state = CoupGame()  # global variable

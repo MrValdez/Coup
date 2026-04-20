@@ -2,7 +2,7 @@ import os
 import random
 
 from src.pycoup.core import action, errors
-from src.pycoup.core.game import GameState
+from src.pycoup.core.game import game_state
 from src.pycoup.core.player import Player
 
 # Freemode allows the game to allow for any cards to be played
@@ -11,11 +11,11 @@ FreeMode = False
 
 defaultNames = ["Leonardo", "Michelangelo", "Raphael", "Donatello", "Splinter", "April"]
 
-Players = []
-PlayersAlive = []
+Players: list[Player] = []
+PlayersAlive: list[Player] = []
 CurrentPlayer = 0
 
-AvailableActions = []
+AvailableActions: list[action.Action] = []
 
 
 class ConsolePlayer(Player):
@@ -52,7 +52,7 @@ class ConsolePlayer(Player):
         """returns action used by player to blocks action. return None if player allows action."""
         cardBlockers = []
 
-        for card in GameState.CardsAvailable:
+        for card in game_state.CardsAvailable:
             if opponentAction.name in card.blocks:
                 cardBlockers.append(card)
 
@@ -212,11 +212,11 @@ def PrintTurnOrder(currentPlayerShown):
 
 
 def PrintDeckList():
-    print("There are %i cards in the Court Deck" % (len(GameState.Deck)))
+    print("There are %i cards in the Court Deck" % (len(game_state.Deck)))
 
     if FreeMode:
         # calculate what cards can be in the court deck
-        deck = GameState.CardsAvailable * 3
+        deck = game_state.CardsAvailable * 3
         for player in Players:
             for card in player.influence:
                 try:
@@ -229,7 +229,7 @@ def PrintDeckList():
 
                     FakeCard.name = "%s (Extra)" % (card.name)
                     deck.append(FakeCard)
-        for card in GameState.RevealedCards:
+        for card in game_state.RevealedCards:
             deck.remove(card)
 
         deck = [card.name for card in deck]
@@ -241,13 +241,13 @@ def PrintDeckList():
 
 
 def PrintRevealedCards():
-    size = len(GameState.RevealedCards)
+    size = len(game_state.RevealedCards)
     if size == 0:
         return
 
     print("There are %i cards that has been revealed:" % (size))
 
-    reveals = [card.name for card in GameState.RevealedCards]
+    reveals = [card.name for card in game_state.RevealedCards]
     reveals.sort()
     for card in reveals:
         print("   ", card)
@@ -262,7 +262,7 @@ def PrintActions():
 
 def SelectCards(message, twoCards):
     print(message)
-    for i, card in enumerate(GameState.CardsAvailable):
+    for i, card in enumerate(game_state.CardsAvailable):
         print("%i: %s" % (i + 1, card.name))
 
     def InputCard(message):
@@ -271,10 +271,10 @@ def SelectCards(message, twoCards):
             return InputCard(message)
         card = int(card) - 1
 
-        if not (card >= 0 and card < len(GameState.CardsAvailable)):
+        if not (card >= 0 and card < len(game_state.CardsAvailable)):
             return InputCard(message)
 
-        return GameState.CardsAvailable[card]
+        return game_state.CardsAvailable[card]
 
     card1 = InputCard("Card #1: ")
 
@@ -287,9 +287,9 @@ def SelectCards(message, twoCards):
 
 def SetupActions():
     global AvailableActions
-    for common_actions in GameState.CommonActions:
+    for common_actions in game_state.CommonActions:
         AvailableActions.append(common_actions)
-    for cards_available_action in GameState.CardsAvailable:
+    for cards_available_action in game_state.CardsAvailable:
         AvailableActions.append(cards_available_action)
 
 
@@ -306,15 +306,15 @@ def SetupRNG():
         cards = SelectCards(message, False)
         return cards[0]
 
-    GameState.randomShuffle = randomShuffle
-    GameState.randomSelector = randomSelector
+    game_state.randomShuffle = randomShuffle
+    game_state.randomSelector = randomSelector
 
 
 def Setup():
     # How many people are playing?
     # Generate the player list
     # Shuffle the player list
-    GameState.reset()
+    game_state.reset()
     SetupActions()
 
     def GetNumberOfPlayers():
@@ -526,7 +526,7 @@ def MainLoop():
                 print("")
 
                 status, response = player.play(AvailableActions[move], target)
-            except action.ActionNotAllowed as e:
+            except errors.ActionNotAllowed as e:
                 print(e.message)
                 ChooseAction()
                 return
@@ -537,11 +537,11 @@ def MainLoop():
                 )
                 ChooseAction()
                 return
-            except action.BlockOnly:
+            except errors.BlockOnly:
                 print("You cannot play %s as an action" % (AvailableActions[move].name))
                 ChooseAction()
                 return
-            except action.TargetRequired:
+            except errors.TargetRequired:
                 print("You need to select a valid target.\n")
                 PrintActions()
                 ChooseAction()

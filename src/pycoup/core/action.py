@@ -12,17 +12,17 @@
 #   ForceCoupCoins
 
 from src.pycoup.core import errors
-from src.pycoup.core.game import GameState
+from src.pycoup.core.game import game_state
 
 ForceCoupCoins = 10
 
 
 class Action:
-    name = ""
-    description = ""
-    blocks = []
-    hasTarget = False
-    coinsNeeded = 0
+    name: str = ""
+    description: str = ""
+    blocks: list[str] = []
+    hasTarget: bool = False
+    coinsNeeded: int = 0
 
     def play(self, player, target=None):
         """
@@ -150,7 +150,7 @@ class Ambassador(Action):
         influenceRemaining = len(player.influence)
         choices = list(player.influence)
 
-        deckCards = [GameState.DrawCard(), GameState.DrawCard()]
+        deckCards = [game_state.DrawCard(), game_state.DrawCard()]
         choices.append(deckCards[0])
         choices.append(deckCards[1])
 
@@ -161,8 +161,8 @@ class Ambassador(Action):
             newInfluence = [newInfluence]
 
         def ReturnCards():
-            GameState.AddToDeck(deckCards[0])
-            GameState.AddToDeck(deckCards[1])
+            game_state.AddToDeck(deckCards[0])
+            game_state.AddToDeck(deckCards[1])
 
         if len(newInfluence) != influenceRemaining:
             # There is a missing card. Try again.
@@ -187,5 +187,5 @@ class Ambassador(Action):
             choices.remove(card)
 
         for card in choices:
-            GameState.AddToDeck(card)
+            game_state.AddToDeck(card)
         return True, "Success"

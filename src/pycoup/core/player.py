@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import random
+from typing import TYPE_CHECKING
 
 from src.pycoup.core.action import (
     Coup,
     ForceCoupCoins,
 )
 from src.pycoup.core import errors
-from src.pycoup.core.game import GameState
+from src.pycoup.core.game import game_state
+
+if TYPE_CHECKING:
+    from src.pycoup.core.action import Action
 
 
 class Player:
@@ -18,14 +24,14 @@ class Player:
         self.coins = 2
         self.alive = True
 
-        card1 = GameState.DrawCard()
-        card2 = GameState.DrawCard()
+        card1 = game_state.DrawCard()
+        card2 = game_state.DrawCard()
         self.influence = [card1, card2]
         # self.influence = [Action, Action]  # for testing purposes
 
-        GameState.PlayerList.append(self)
+        game_state.PlayerList.append(self)
 
-    def giveCards(self, card1, card2=None):
+    def giveCards(self, card1: type[Action], card2: type[Action] | None = None) -> bool:
         """
         Give the player one or two cards.
          If player cannot receive cards, return False.
@@ -42,12 +48,14 @@ class Player:
 
         self.influence[0] = card1
 
-        if len(self.influence) == 2:
+        if len(self.influence) == 2 and card2 is not None:
             self.influence[1] = card2
 
         return True
 
-    def play(self, action, target=None):
+    def play(
+        self, action: type[Action], target: Player | None = None
+    ) -> tuple[bool, str | None]:
         """
         1. Check if player is alive. If not, throw exception.
         2. Check if player has at least 12 coins. If they do, throw exception unless coup is played.
@@ -79,9 +87,9 @@ class Player:
         callingPlayer = None
 
         if (
-            action in GameState.CardsAvailable
+            action in game_state.CardsAvailable
         ):  # should only call bluff for cards, not common actions
-            callingPlayer = GameState.requestCallForBluffs(self, action, target)
+            callingPlayer = game_state.requestCallForBluffs(self, action, target)
 
         if callingPlayer is not None:
             # step 4.a
@@ -90,8 +98,8 @@ class Player:
                 index = self.influence.index(action)
                 card = self.influence[index]
                 self.influence.remove(card)
-                GameState.AddToDeck(card)
-                card = GameState.DrawCard()
+                game_state.AddToDeck(card)
+                card = game_state.DrawCard()
                 self.influence.append(card)
 
                 callingPlayer.loseInfluence()
@@ -104,12 +112,12 @@ class Player:
         blockingPlayer = None
 
         # should only call bluff for cards, not common actions
-        if len(GameState.getBlockingActions(action)):
-            blockingPlayer, blockingAction = GameState.requestBlocks(
+        if len(game_state.getBlockingActions(action)):
+            blockingPlayer, blockingAction = game_state.requestBlocks(
                 self, action, target
             )
 
-        if blockingPlayer is not None:
+        if blockingPlayer is not None and blockingAction is not None:
             # Step 3.a
             if self.confirmCall(blockingPlayer, blockingAction):
                 if blockingAction in blockingPlayer.influence:
@@ -128,7 +136,8 @@ class Player:
                 return False, message
 
         # Step 5
-        status, response = action.play(action, self, target)
+        # The codebase uses classes as actions and calls them on the class itself with the class as first argument.
+        status, response = action.play(action, self, target)  # type: ignore[arg-type]
         return status, response
 
     def loseInfluence(self):
@@ -138,7 +147,7 @@ class Player:
         if len(self.influence) == 0:
             self.alive = False
 
-        GameState.RevealedCards.append(loses)
+        game_state.RevealedCards.append(loses)
 
     def confirmCall(self, activePlayer, action):
         """return True if player confirms call for bluff on active player's action. returns False if player allows action."""
@@ -180,7 +189,7 @@ class Player:
             )
 
         self.influence.remove(card)
-        GameState.AddToDeck(card)
+        game_state.AddToDeck(card)
 
-        newCard = GameState.DrawCard()
+        newCard = game_state.DrawCard()
         self.influence.append(newCard)

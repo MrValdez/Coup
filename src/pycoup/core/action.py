@@ -28,11 +28,11 @@ class Action:
         """
         Should be overridden by child classes.
         Returns (status, response) where:
-          status:     True/False if action is successful or not
-          response:   String explaining status. Usually reserved for explanation of why an action failed.
+            status:     True/False if action is successful or not
+            response:   String explaining status. Usually reserved for explanation of why an action failed.
         Example:
-           return True, "Success"
-           return False, "Failed because it was blocked"
+            return True, "Success"
+            return False, "Failed because it was blocked"
         """
         return False, None
 

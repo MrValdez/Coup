@@ -63,14 +63,14 @@ class Coup(Action):
 
     def play(self, player, target=None):
         if player.coins < self.coins_needed:
-            raise errors.NotEnoughCoins(self.coins_needed)
+            raise errors.NotEnoughCoinsError(self.coins_needed)
 
         # target should be alive
         if target is None:
-            raise errors.TargetRequired
+            raise errors.TargetRequiredError
 
         if not target.alive:
-            raise errors.InvalidTarget("Target is dead")
+            raise errors.InvalidTargetError("Target is dead")
 
         player.coins -= 7
         target.lose_influence()
@@ -95,7 +95,7 @@ class Captain(Action):
 
     def play(self, player, target=None):
         if target is None:
-            raise errors.TargetRequired
+            raise errors.TargetRequiredError
 
         steal = min(2, target.coins)
 
@@ -113,7 +113,7 @@ class Contessa(Action):
     blocks = ["Assassin"]
 
     def play(self, player, target=None):
-        raise errors.BlockOnly
+        raise errors.BlockOnlyError
 
 
 class Assassin(Action):
@@ -125,9 +125,9 @@ class Assassin(Action):
 
     def play(self, player, target=None):
         if player.coins < self.coins_needed:
-            raise errors.NotEnoughCoins(self.coins_needed)
+            raise errors.NotEnoughCoinsError(self.coins_needed)
         if target is None:
-            raise errors.TargetRequired
+            raise errors.TargetRequiredError
 
         player.coins -= 3
         target.lose_influence()
@@ -161,12 +161,12 @@ class Ambassador(Action):
 
         if len(new_influence) != influence_remaining:
             return_cards()
-            raise errors.InvalidTarget("Wrong number of cards given")
+            raise errors.InvalidTargetError("Wrong number of cards given")
 
         for card in new_influence:
             if card not in choices:
                 return_cards()
-                raise errors.InvalidTarget("Card given not part of valid choices")
+                raise errors.InvalidTargetError("Card given not part of valid choices")
 
         # give the player their new cards
         player.influence = list(new_influence)

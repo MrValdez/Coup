@@ -466,18 +466,18 @@ def main_loop():
                 status, response = player.play(action_obj, target)
                 if not status:
                     print(response)
-            except errors.ActionNotAllowed as e:
+            except errors.ActionNotAllowedError as e:
                 print(e.message)
                 return choose_action()
-            except errors.NotEnoughCoins as exc:
+            except errors.NotEnoughCoinsError as exc:
                 print(
                     f" You need {exc.coins_needed} coins to play {action_obj.name}. You only have {player.coins} coins."
                 )
                 return choose_action()
-            except errors.BlockOnly:
+            except errors.BlockOnlyError:
                 print(f"You cannot play {action_obj.name} as an action")
                 return choose_action()
-            except errors.TargetRequired:
+            except errors.TargetRequiredError:
                 print("You need to select a valid target.\n")
                 print_actions()
                 return choose_action()

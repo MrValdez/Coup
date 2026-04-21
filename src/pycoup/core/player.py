@@ -75,16 +75,16 @@ class Player:
                    Else, remove influence from calling player
         """
         if not self.alive or (target is not None and not target.alive):
-            raise errors.DeadPlayer
+            raise errors.DeadPlayerError
 
         if target == self:
-            raise errors.TargetRequired
+            raise errors.TargetRequiredError
 
         if self.coins < action.coins_needed:
-            raise errors.NotEnoughCoins(action.coins_needed)
+            raise errors.NotEnoughCoinsError(action.coins_needed)
 
         if self.coins >= FORCE_COUP_COINS and action != Coup:
-            raise errors.ActionNotAllowed(
+            raise errors.ActionNotAllowedError(
                 f"Player has {self.coins} coins. Forced Coup is the only allowed action"
             )
 

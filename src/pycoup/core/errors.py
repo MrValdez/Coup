@@ -1,29 +1,29 @@
 # Coup specific exceptions
-#   TargetRequired
-#   NotEnoughCoins
-#   BlockOnly
-#   DeadPlayer
-#   InvalidTarget
-#   ActionNotAllowed
+#   TargetRequiredError
+#   NotEnoughCoinsError
+#   BlockOnlyError
+#   DeadPlayerError
+#   InvalidTargetError
+#   ActionNotAllowedError
 #   MajorError
-class TargetRequired(Exception):
+class TargetRequiredError(Exception):
     pass
 
 
-class BlockOnly(Exception):
+class BlockOnlyError(Exception):
     pass
 
 
-class DeadPlayer(Exception):
+class DeadPlayerError(Exception):
     pass
 
 
-class NotEnoughCoins(Exception):
+class NotEnoughCoinsError(Exception):
     def __init__(self, coins_needed: int):
         self.coins_needed = coins_needed
 
 
-class InvalidTarget(Exception):
+class InvalidTargetError(Exception):
     def __init__(self, message: str):
         self.message = message
 
@@ -31,7 +31,7 @@ class InvalidTarget(Exception):
         return self.message
 
 
-class ActionNotAllowed(Exception):
+class ActionNotAllowedError(Exception):
     def __init__(self, message: str):
         self.message = message
 

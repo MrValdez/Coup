@@ -19,12 +19,12 @@ class DeadPlayer(Exception):
 
 
 class NotEnoughCoins(Exception):
-    def __init__(self, coinsNeeded):
-        self.coinsNeeded = coinsNeeded
+    def __init__(self, coins_needed: int):
+        self.coins_needed = coins_needed
 
 
 class InvalidTarget(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
     def __str__(self):
@@ -32,7 +32,7 @@ class InvalidTarget(Exception):
 
 
 class ActionNotAllowed(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
     def __str__(self):
@@ -40,7 +40,7 @@ class ActionNotAllowed(Exception):
 
 
 class MajorError(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
     def __str__(self):

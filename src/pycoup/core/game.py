@@ -12,33 +12,33 @@ if TYPE_CHECKING:
 
 class CoupGame:
     def reset(self):
-        self.PlayerList: list[Player] = []
+        self.player_list: list[Player] = []
 
         from . import action
 
-        self.CommonActions = [action.Income, action.ForeignAid, action.Coup]
-        self.CardsAvailable = [
+        self.common_actions = [action.Income, action.ForeignAid, action.Coup]
+        self.cards_available = [
             action.Duke,
             action.Captain,
             action.Assassin,
             action.Ambassador,
             action.Contessa,
         ]
-        self.Deck = self.CardsAvailable * 3
-        random.shuffle(self.Deck)
+        self.deck = self.cards_available * 3
+        random.shuffle(self.deck)
 
-        self.RevealedCards: list[type[action.Action]] = []
+        self.revealed_cards: list[type[action.Action]] = []
 
         # separating these function allow outside modules (like the unit test) to change the behavior of
         # shuffling and selecting a card
-        self.randomShuffle = random.shuffle
-        self.randomSelector = random.choice
+        self.random_shuffle = random.shuffle
+        self.random_selector = random.choice
 
-    def requestBlocks(
+    def request_blocks(
         self,
-        activePlayer: Player,
+        active_player: Player,
         action: type[action.Action],
-        targetPlayer: Player | None,
+        target_player: Player | None,
     ) -> tuple[Player | None, type[action.Action] | None]:
         """
         Ask each player if they want to block active player's action.
@@ -46,81 +46,76 @@ class CoupGame:
         for the sake of game flow, the targetted player (if any) will be requested first.
         If someone wants to block, return the tuple (player, action). Else, return (None, None).
         """
-        ActiveIndex = self.PlayerList.index(activePlayer)
-        PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
+        active_index = self.player_list.index(active_player)
+        player_list = self.player_list[active_index:] + self.player_list[0:active_index]
 
-        if targetPlayer is not None:
-            TargetIndex = self.PlayerList.index(targetPlayer)
-            PlayerList.remove(targetPlayer)
-            PlayerList = [self.PlayerList[TargetIndex]] + PlayerList
+        if target_player is not None:
+            target_index = self.player_list.index(target_player)
+            player_list.remove(target_player)
+            player_list = [self.player_list[target_index]] + player_list
 
-        for player in PlayerList:
-            if player == activePlayer or not player.alive:
+        for player in player_list:
+            if player == active_player or not player.alive:
                 continue
 
-            blockingAction = player.confirmBlock(activePlayer, action)
+            blocking_action = player.confirm_block(active_player, action)
 
-            if blockingAction is not None:
+            if blocking_action is not None:
                 # check that the block is valid
-                if action.name not in blockingAction.blocks:
+                if action.name not in blocking_action.blocks:
                     continue
 
-                return player, blockingAction
+                return player, blocking_action
 
         return None, None
 
-    def requestCallForBluffs(
+    def request_call_for_bluffs(
         self,
-        activePlayer: Player,
+        active_player: Player,
         action: type[action.Action],
-        targetPlayer: Player | None,
+        target_player: Player | None,
     ) -> Player | None:
         """
         Ask each player if they want to call active player's (possible) bluff.
         Requests are performed in a clockwise rotation (http://boardgamegeek.com/article/18425206#18425206). However,
-        for the sake of game flow, the targetted player (if any) will be requested first.
+        for the sake of game flow, the targeted player (if any) will be requested first.
         If someone wants to call, return the player. Else, return None
         """
-        ActiveIndex = self.PlayerList.index(activePlayer)
-        PlayerList = self.PlayerList[ActiveIndex:] + self.PlayerList[0:ActiveIndex]
+        active_index = self.player_list.index(active_player)
+        player_list = self.player_list[active_index:] + self.player_list[0:active_index]
 
-        if targetPlayer is not None:
-            TargetIndex = self.PlayerList.index(targetPlayer)
-            PlayerList.remove(targetPlayer)
-            PlayerList = [self.PlayerList[TargetIndex]] + PlayerList
+        if target_player is not None:
+            target_index = self.player_list.index(target_player)
+            player_list.remove(target_player)
+            player_list = [self.player_list[target_index]] + player_list
 
-        for player in PlayerList:
-            if player == activePlayer or not player.alive:
+        for player in player_list:
+            if player == active_player or not player.alive:
                 continue
-            if player.confirmCall(activePlayer, action):
+            if player.confirm_call(active_player, action):
                 return player
         return None
 
-    def AddToDeck(self, card: type[action.Action]):
+    def add_to_deck(self, card: type[action.Action]):
         # todo: add error handling
-        self.Deck.append(card)
-        self.randomShuffle(self.Deck)
+        self.deck.append(card)
+        self.random_shuffle(self.deck)
 
-    def DrawCard(self) -> type[action.Action]:
-        if not len(self.Deck):
+    def draw_card(self) -> type[action.Action]:
+        if not self.deck:
             raise MajorError("There is no card in the court deck!")
 
-        card = self.randomSelector(self.Deck)
-        self.Deck.remove(card)
+        card = self.random_selector(self.deck)
+        self.deck.remove(card)
         return card
 
-    def getBlockingActions(
+    def get_blocking_actions(
         self, action: type[action.Action]
     ) -> list[type[action.Action]]:
         """
-        returns all the cards the block an action
+        Returns all the cards that block an action.
         """
-        blockers = []
-        for card in self.CardsAvailable:
-            if action.name in card.blocks:
-                blockers.append(card)
-
-        return blockers
+        return [card for card in self.cards_available if action.name in card.blocks]
 
 
 game_state = CoupGame()  # global variable

@@ -313,7 +313,7 @@ class Players(unittest.TestCase):
         self.assertEqual(len(game_state.deck), 1)
         self.assertIn(action.ForeignAid, game_state.deck)
 
-    def test_player_change_csard(self):
+    def test_player_change_card(self):
         """
         Tests releated to the ChangeCard in Player class:
          - player has two influences

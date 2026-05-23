@@ -9,3 +9,4 @@ dist/
 .pytest_cache
 uv.lock
 *.db
+cache/

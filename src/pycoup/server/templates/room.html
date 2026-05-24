@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+    <table>
+        <tr>
+            <td>
+                {% if data.has_started %}
+                    sitting down anim
+                {% else %}
+                    <table>
+                        <tr><th>Current players</th></tr>
+                        {% for player in data.players %}
+                            <tr>
+                                <td>{{ player.name }} {% if player.slot_id == data.your_index %} (You!){% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td><button>start</button></td>
+                        </tr>
+                    </table>
+                {% endif %}
+            </td>
+            <td valign=top>
+                <table>
+                    <tr><th>Chat</th></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br />
+    {{ lobby_html | safe }}
+{% endblock %}

@@ -32,7 +32,7 @@ async def change_player_name_form(request: Request):
 
     # Force the browser to use GET for the next request
     status_code = status.HTTP_303_SEE_OTHER
-    return air.RedirectResponse(url=app.url_path_for("lobby"), status_code=status_code)
+    return air.RedirectResponse(url=form.submitted_data.get("url_origin"), status_code=status_code)
 
 def set_display_name(request: Request, name):
     player_id = get_player_id(request)
@@ -63,6 +63,7 @@ def get_user_data(request: Request) -> dict:
                         air.Em("If blank, a random name will be provided"),
                     ),
                     air.Input(name="name", value=display_name),
+                    air.Input(type="hidden", name="url_origin", value=request.url),
                     air.Input(type="Submit", value="change name"),
                     class_="grid",
                 ),
@@ -91,14 +92,14 @@ async def lobby(request: Request, extra_data: Optional[dict[str, str]] = {}):
 def get_rooms(request):
     rows = []
     rooms = api.room_list()
-    for id, room in rooms.items():
-        players = ", ".join(room["players"])
+    for room_id, room in rooms.items():
+        players = ", ".join([_["name"] for _ in room["players"]])
 
-        room_url = app.url_path_for("room", id=id)
+        room_url = app.url_path_for("room", room_id=room_id)
         join_button = air.Button("Join", onclick=f"location.href='{room_url}'")
 
         rows.append(
-            air.Tr(air.Td(id), air.Td(players), air.Td(join_button))
+            air.Tr(air.Td(room_id), air.Td(players), air.Td(join_button))
         )
 
     content = (
@@ -113,25 +114,35 @@ def get_rooms(request):
     return content
 
 
-@app.get("/room/{id}")
-async def room(id: str, request: Request):
-    content = api.get_room_state(id)
-    if content:
-        title = f"pyCoup Room #{id}"
-    else:
-        content = air.A("Return to lobby", href=app.url_path_for("lobby"))
+@app.get("/room/{room_id}")
+async def room(room_id: str, request: Request):
+    game = Game()
+
+    player_id = get_player_id(request)
+    room = game.get_room(room_id)
+
+    data = None
+    if not room:
         title = f"pyCoup Room not found"
+    else:
+        title = f"pyCoup Room #{room_id}"
+
+        player_name = get_display_name(request)
+        room.add_or_update_player(player_id, player_name)
+        data = room.get_state(player_id)
+
+    lobby_html = air.A("Return to lobby", href=app.url_path_for("lobby"))
 
     return jinja(
         request,
-        "base.html",
+        "room.html",
         title=title,
-        content=content,
+        lobby_html=lobby_html,
+        data=data,
         **get_user_data(request),
     )
 
 
-@app.get("/api/player/id")
 def get_player_id(request: Request):
     game = Game()
     if "player-hash-id" not in request.session:

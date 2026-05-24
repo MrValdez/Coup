@@ -26,17 +26,17 @@
             <em>Alpha version. Expect bugs</em>
         </header>
 
-        {{ display_name_html|safe }}
-        {% if error %}
-            {{ error }}
-        {% endif %}
+        <div class="container">
+            {{ display_name_html|safe }}
+            {% if error %}
+                {{ error }}
+            {% endif %}
+        </dimv>
 
         <main class="container">
-            {# We need to safe the content, which can be
-            a security risk. We'll cover mitigation
-            of such issues later on this page.
-        #}
-            {{ content|safe }}
+            {% block content %}
+                {{ content|safe }}
+            {% endblock %}
         </main>
     </body>
 </html>

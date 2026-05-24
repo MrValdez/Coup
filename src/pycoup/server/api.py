@@ -13,8 +13,8 @@ def room_list():
 
 
 @fastapi.get("/room/{id}")
-def get_room_state(id):
+def get_room_state(id, player_id=None):
     game = Game()
-    state = game.get_room_state(id)
+    state = game.get_room_state(id, player_id)
 
     return state

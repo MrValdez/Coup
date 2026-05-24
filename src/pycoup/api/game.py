@@ -83,6 +83,9 @@ class Game:
     def __init__(self, cache_engine=Cache):
         self.cache = cache_engine()
 
+    def generate_player_id(self):
+        return uuid()[:5].upper()
+
     def get_room_ids(self):
         return self.cache.get(GAME_INFO_ROOMS) or set()
 

@@ -33,8 +33,10 @@ class Cache(diskcache.Cache):
 class Room:
     def __init__(self, game, id=None):
         self._id = None
+        self.next_player_id = 0
         self.game = game
-        self.players = []
+        self.players = {}
+        self.has_started = False
 
         self.cache = game.cache
         if id:
@@ -57,24 +59,41 @@ class Room:
     def load(self):
         if players := self.cache.get_room(self.id, "players"):
             self.players = players
+        if next_player_id := self.cache.get_room(self.id, "next_player_id"):
+            self.next_player_id = next_player_id
 
-    def add_player(self, player):
+    def add_or_update_player(self, player_id: str, name: str):
         self.load()
-        self.players.append(player)
-        self.cache.set_room(self.id, "players", self.players)
+        if player_id not in self.players:
+            self.players[player_id] = {}
 
-    def get_state(self, minimal=False):
+        player = self.players[player_id]
+        player["slot_id"] = self.next_player_id
+        player["name"] = name
+        self.next_player_id += 1
+
+        self.cache.set_room(self.id, "players", self.players)
+        self.cache.set_room(self.id, "next_player_id", self.next_player_id)
+
+    def get_state(self, player_id=None, minimal=False):
         """
         Returns information on the room as a dictionary. If minimal is True, only those with * are returned:
             - *Players
             - Current Turn
             - Current Game State
+
+        If player_id is provided, also return information specific for that player, if they are in cache.
         """
         data = {
-            "players": self.players,
+            "players": self.players.values(),
+            "has_started": self.has_started,
         }
         if not minimal:
             data.update({})
+        if player_id and player_id in self.players:
+            data.update({
+                "your_index": self.players[player_id]["slot_id"],
+            })
 
         return data
 
@@ -94,6 +113,11 @@ class Game:
         room_ids.add(id)
         self.cache.set(GAME_INFO_ROOMS, room_ids)
 
+    def create_room(self):
+        room = Room(self)
+        self.add_room_id(room.id)
+        return room
+
     def get_rooms(self, minimal=True):
         room_ids = self.get_room_ids()
         rooms = {}
@@ -105,29 +129,34 @@ class Game:
 
         return rooms
 
-    def get_room_state(self, id):
+    def get_room(self, id):
         if id not in self.get_room_ids():
             return None
 
-        return Room(self, id).get_state(minimal=False)
+        return Room(self, id)
+
+    def get_room_state(self, id, player_id=None):
+        """ if player_id is given, we can include data specific to player """
+        room = self.get_room(id)
+        if room is None:
+            return None
+
+        return room.get_state(player_id, minimal=False)
 
 
 if __name__ == "__main__":
-    defaultNames = ["Leonardo", "Michelangelo", "Raphael", "Donatello", "Splinter", "April"]
+    from . import utils
 
     game = Game()
-    print(game.get_room_ids())
-    print("==")
 
-    a = Room(game)
-    for player in defaultNames:
-        a.add_player(player)
-    id = a.id
+    #a = Room(game)
+    a = game.create_room()
 
-    print(id)
+    for i in range(3):
+        id = game.generate_player_id()
+        name = utils.generate_random_name()
+        a.add_or_update_player(id, name)
 
-    a.add_player("Shredder")
-    b = Room(game, id=id)
-    print(b.players)
-
+    a.load()
+    print(a.get_state())
     print(game.get_room_ids())

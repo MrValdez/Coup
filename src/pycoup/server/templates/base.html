@@ -18,12 +18,13 @@
                 border: 1px solid;
                 width: 80%;
             }
+            {% block extra_style %}{% endblock %}
         </style>
     </head>
     <body>
         <header class="container">
             <h1>{{title}}</h1>
-            <em>Alpha version. Expect bugs</em>
+            <em>Alpha version. Expect bugs and insecure apis.</em>
         </header>
 
         <div class="container">

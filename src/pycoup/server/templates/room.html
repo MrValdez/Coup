@@ -1,4 +1,17 @@
 {% extends "base.html" %}
+
+{% block extra_style %}
+    #chatbox {
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    .chat_msg {
+      margin: 5px 0;
+    }
+{% endblock %}
+
 {% block content %}
     <table>
         <tr>
@@ -19,10 +32,46 @@
                     </table>
                 {% endif %}
             </td>
-            <td valign=top>
+            <td valign=top width=30%>
                 <table>
                     <tr><th>Chat</th></tr>
+                    <tr><td colspan=2><div id="chatbox"></div></td></tr>
+
+                    <tr>
+                        <form id="chat_form">
+                            <td>
+                                <input type="text" id="chat_input" placeholder="Chat..." autocomplete="off" />
+                            </td>
+                            <td>
+                                <button>Send</button>
+                            </td>
+                        </form>
+                    </tr>
                 </table>
+
+                <script>
+                    chatbox = document.getElementById("chatbox");
+                    chat_form = document.getElementById('chat_form');
+                    chat_input = document.getElementById('chat_input');
+
+                    ws = new WebSocket("{{chat_server}}");
+                    ws.onmessage = event => {
+                        msg = document.createElement('div');
+                        msg.classList.add('message');
+                        msg.textContent = event.data;
+                        chatbox.appendChild(msg);
+                        chatbox.scrollTop = chatbox.scrollHeight;
+                    }
+
+                    chat_form.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        message = chat_input.value;
+                        if (message) {
+                            ws.send(message);
+                            chat_input.value = '';
+                        }
+                    });
+                </script>
             </td>
         </tr>
     </table>

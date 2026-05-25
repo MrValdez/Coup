@@ -1,10 +1,13 @@
 import air
-from fastapi import status
 import os
 
 from time import time
 from pathlib import Path
+from typing import Optional
+
 from air.requests import Request
+from fastapi import status
+
 from . import api, models
 
 from src.pycoup.api.game import Game
@@ -34,8 +37,9 @@ async def change_player_name_form(request: Request):
     status_code = status.HTTP_303_SEE_OTHER
     return air.RedirectResponse(url=form.submitted_data.get("url_origin"), status_code=status_code)
 
+
 def set_display_name(request: Request, name):
-    player_id = get_player_id(request)
+    player_id = api.get_player_id(request)
     request.session["player-display-name"] = name
     game = Game()
     #game.addPlayer
@@ -49,8 +53,8 @@ def get_display_name(request: Request) -> str:
     return name
 
 
-def get_user_data(request: Request) -> dict:
-    player_id = get_player_id(request)
+def get_user_data(request: Request, room_id: str|None = None) -> dict:
+    player_id = api.get_player_id(request)
     display_name = get_display_name(request)
 
     return {
@@ -71,9 +75,10 @@ def get_user_data(request: Request) -> dict:
                 action=app.url_path_for("change_player_name_form"),
                 class_="player_name",
             ),
+        "chat_server": app.url_path_for("chat_ws", room_id=room_id) + f"?player_id={player_id}",
+#f"ws://{request.hostname}:{request.port}/chat",
     }
 
-from typing import Optional
 
 @app.get("/")
 async def lobby(request: Request, extra_data: Optional[dict[str, str]] = {}):
@@ -118,7 +123,7 @@ def get_rooms(request):
 async def room(room_id: str, request: Request):
     game = Game()
 
-    player_id = get_player_id(request)
+    player_id = api.get_player_id(request)
     room = game.get_room(room_id)
 
     data = None
@@ -139,16 +144,8 @@ async def room(room_id: str, request: Request):
         title=title,
         lobby_html=lobby_html,
         data=data,
-        **get_user_data(request),
+        **get_user_data(request, room_id),
     )
-
-
-def get_player_id(request: Request):
-    game = Game()
-    if "player-hash-id" not in request.session:
-        request.session["player-hash-id"] = game.generate_player_id()
-
-    return request.session["player-hash-id"]
 
 
 app.mount("/api", api.fastapi)

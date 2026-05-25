@@ -10,6 +10,10 @@ class UnloadedData(Exception):
     pass
 
 
+class ChangingRoomIdNotAllowed(Exception):
+    pass
+
+
 class Cache(diskcache.Cache):
     """
     This class will cache information grouped by id
@@ -18,43 +22,39 @@ class Cache(diskcache.Cache):
     def __init__(self, directory="cache", *args, **kwargs):
         super().__init__(directory, *args, **kwargs)
 
-    def _update_room_key(self, id, key):
-        return f"{id}:{key}"
+    def _update_room_key(self, room_id, key):
+        return f"{room_id}:{key}"
 
-    def get_room(self, id, key, *args, **kwargs):
-        key = self._update_room_key(id, key)
+    def get_room(self, room_id, key, *args, **kwargs):
+        key = self._update_room_key(room_id, key)
         return super().get(key, *args, **kwargs)
 
-    def set_room(self, id, key, value, *args, **kwargs):
-        key = self._update_room_key(id, key)
+    def set_room(self, room_id, key, value, *args, **kwargs):
+        key = self._update_room_key(room_id, key)
         return super().set(key, value, *args, **kwargs)
 
 
 class Room:
-    def __init__(self, game, id=None):
-        self._id = None
-        self.next_player_id = 0
+    def __init__(self, game, room_id=None):
         self.game = game
+        self.next_player_id = 1
         self.players = {}
         self.has_started = False
 
-        self.cache = game.cache
-        if id:
-            self.id = id
+        self.cache = self.game.cache
+        if room_id:
+            self._room_id = room_id
             self.load()
+        else:
+            self._room_id = uuid()[:5].upper()
 
     @property
-    def id(self):
-        if self._id is None:
-            self._id = uuid()[:5].upper()
+    def room_id(self):
+        return self._room_id
 
-        return self._id
-
-    @id.setter
+    @room_id.setter
     def id(self, x):
-        self._id = x
-
-        self.game.add_room_id(self._id)
+        raise ChangingRoomIdNotAllowed()
 
     def load(self):
         if players := self.cache.get_room(self.id, "players"):
@@ -74,6 +74,12 @@ class Room:
 
         self.cache.set_room(self.id, "players", self.players)
         self.cache.set_room(self.id, "next_player_id", self.next_player_id)
+
+    def get_player_name(self, player_id: str):
+        if player_id not in self.players:
+            return None
+
+        return self.players[player_id]["name"]
 
     def get_state(self, player_id=None, minimal=False):
         """
@@ -108,36 +114,37 @@ class Game:
     def get_room_ids(self):
         return self.cache.get(GAME_INFO_ROOMS) or set()
 
-    def add_room_id(self, id):
+    def add_room_id(self, room_id):
         room_ids = self.get_room_ids()
-        room_ids.add(id)
+        room_ids.add(room_id)
         self.cache.set(GAME_INFO_ROOMS, room_ids)
 
     def create_room(self):
         room = Room(self)
-        self.add_room_id(room.id)
+        self.add_room_id(room.room_id)
+
         return room
 
     def get_rooms(self, minimal=True):
         room_ids = self.get_room_ids()
         rooms = {}
 
-        for id in room_ids:
-            key = f"{id}:{ROOM_HEADER}"
-            room = Room(self, id)
-            rooms[id] = room.get_state(minimal=minimal)
+        for room_id in room_ids:
+            key = f"{room_id}:{ROOM_HEADER}"
+            room = Room(self, room_id)
+            rooms[room_id] = room.get_state(minimal=minimal)
 
         return rooms
 
-    def get_room(self, id):
-        if id not in self.get_room_ids():
+    def get_room(self, room_id):
+        if room_id not in self.get_room_ids():
             return None
 
-        return Room(self, id)
+        return Room(self, room_id)
 
-    def get_room_state(self, id, player_id=None):
+    def get_room_state(self, room_id, player_id=None):
         """ if player_id is given, we can include data specific to player """
-        room = self.get_room(id)
+        room = self.get_room(room_id)
         if room is None:
             return None
 
